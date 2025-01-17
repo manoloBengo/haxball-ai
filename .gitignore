@@ -1,5 +1,7 @@
 # Archivos a ignorar
 .env # variables de entorno para conexion a la base de datos
+postgre_superuser_password.txt
+user_and_password_SQL.txt
 
 # Carpetas a ignorar
 node_modules
