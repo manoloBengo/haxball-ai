@@ -1,5 +1,5 @@
 # Archivos a ignorar
-.env
+.env # variables de entorno para conexion a la base de datos
 
 # Carpetas a ignorar
 node_modules
