@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Configuración de la base de datos PostgreSQL usando variables de entorno
 const client = new Client({
-    user: process.env.DB_USERNAME,
+    user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
@@ -34,7 +34,7 @@ client.connect((err) => {
 // Endpoint para obtener el próximo match_id
 app.get("/next-match-id", async (req, res) => {
     try {
-        const result = await client.query("SELECT COALESCE(MAX(match_id), 0) + 1 AS next_match_id FROM Partidos");
+        const result = await client.query("SELECT COALESCE(MAX(match_id), 0) + 1 AS next_match_id FROM partidos");
         res.json({ next_match_id: result.rows[0].next_match_id });
     } catch (err) {
         res.status(500).send("Error al obtener el próximo match_id.");
@@ -45,7 +45,7 @@ app.get("/next-match-id", async (req, res) => {
 app.post("/register-match", async (req, res) => {
     const { match_id, start_time } = req.body;
     try {
-        await client.query("INSERT INTO Partidos (match_id, start_time) VALUES ($1, $2)", [match_id, start_time]);
+        await client.query("INSERT INTO partidos (match_id, start_time) VALUES ($1, $2)", [match_id, start_time]);
         res.send("Partido registrado correctamente.");
     } catch (err) {
         res.status(500).send("Error al registrar el partido.");
@@ -85,7 +85,7 @@ app.post("/save-positions", async (req, res) => {
             for (const player of position.players) {
                 // Obtener el ID del jugador desde la base de datos
                 const playerResult = await client.query(
-                    "SELECT player_id FROM Jugadores WHERE player_name = $1",
+                    "SELECT player_id FROM jugadores WHERE player_name = $1",
                     [player.player_name]
                 );
 
@@ -139,7 +139,7 @@ app.post("/save-goal", async (req, res) => {
     try {
         // Obtener el ID del jugador desde la base de datos
         const playerResult = await client.query(
-            "SELECT player_id FROM Jugadores WHERE player_name = $1",
+            "SELECT player_id FROM jugadores WHERE player_name = $1",
             [player_name]
         );
 
@@ -147,7 +147,7 @@ app.post("/save-goal", async (req, res) => {
             const playerId = playerResult.rows[0].player_id;
 
             await client.query(`
-                INSERT INTO Goles (match_id, player_id, player_name, equipo, tick)
+                INSERT INTO goles (match_id, player_id, player_name, equipo, tick)
                 VALUES ($1, $2, $3, $4, $5)
             `, [match_id, playerId, player_name, equipo, tick]);  // Insertar el tick del gol
 
@@ -167,7 +167,7 @@ app.post("/register-player", async (req, res) => {
     const { player_id, player_name } = req.body;
     try {
         await client.query(
-            "INSERT INTO Jugadores (player_id, player_name) VALUES ($1, $2) ON CONFLICT (player_id) DO NOTHING",
+            "INSERT INTO jugadores (player_id, player_name) VALUES ($1, $2) ON CONFLICT (player_id) DO NOTHING",
             [player_id, player_name]
         );
         res.send("Jugador registrado correctamente.");
@@ -182,7 +182,7 @@ app.post("/get-or-create-unique-player", async (req, res) => {
     try {
         // 1. Verifica si el jugador ya existe
         const existingPlayer = await client.query(
-            "SELECT player_id FROM Jugadores WHERE player_name = $1",
+            "SELECT player_id FROM jugadores WHERE player_name = $1",
             [player_name]
         );
 
@@ -192,7 +192,7 @@ app.post("/get-or-create-unique-player", async (req, res) => {
         }
 
         // 2. Jugador no registrado: genera un ID único que no esté en la tabla
-        const usedIdsResult = await client.query("SELECT player_id FROM Jugadores");
+        const usedIdsResult = await client.query("SELECT player_id FROM jugadores");
         const usedIds = usedIdsResult.rows.map(row => row.player_id);
 
         // Encuentra el menor ID disponible (puedes usar otra lógica si prefieres)
@@ -203,7 +203,7 @@ app.post("/get-or-create-unique-player", async (req, res) => {
 
         // 3. Registra el nuevo jugador con el ID único
         await client.query(
-            "INSERT INTO Jugadores (player_id, player_name) VALUES ($1, $2)",
+            "INSERT INTO jugadores (player_id, player_name) VALUES ($1, $2)",
             [newPlayerId, player_name]
         );
 
@@ -220,7 +220,7 @@ app.post("/get-or-create-player", async (req, res) => {
     try {
         // Verifica si el jugador ya existe
         const result = await client.query(
-            "SELECT player_id FROM Jugadores WHERE player_name = $1",
+            "SELECT player_id FROM jugadores WHERE player_name = $1",
             [player_name]
         );
 
@@ -232,7 +232,7 @@ app.post("/get-or-create-player", async (req, res) => {
         } else {
             // Jugador no registrado, crear nuevo registro
             const insertResult = await client.query(
-                "INSERT INTO Jugadores (player_name) VALUES ($1) RETURNING player_id",
+                "INSERT INTO jugadores (player_name) VALUES ($1) RETURNING player_id",
                 [player_name]
             );
             player_id = insertResult.rows[0].player_id;
