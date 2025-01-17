@@ -28,7 +28,7 @@ Archivo JavaScript que genera el servidor de HaxBall. Este archivo debe ejecutar
 
 - Usar **Microsoft Edge** para ejecutar el archivo `server.js` del servidor de HaxBall en la consola del navegador.
 
-## Instalación y Configuración
+## Instalación y Configuración (reescribir esta seccion con lo del Notion, esto es un vago resumen)
 
 1. **Backend**:
    - Asegúrate de tener Node.js instalado.
