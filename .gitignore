@@ -1,7 +1,6 @@
 # Archivos a ignorar
 .env
-node
-package.json
-package-lock.json
-not_for_git
-consultas_sql
+
+# Carpetas a ignorar
+not_for_git/
+consultas_sql/
