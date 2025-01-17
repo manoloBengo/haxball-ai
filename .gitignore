@@ -2,5 +2,14 @@
 .env
 
 # Carpetas a ignorar
+node_modules
 not_for_git/
 consultas_sql/
+
+# Sistema operativo Windows
+Thumbs.db
+
+# Archivos de logs y depuración
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
