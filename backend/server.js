@@ -16,7 +16,7 @@ app.use(express.json());
 
 // Configuración de la base de datos PostgreSQL usando variables de entorno
 const client = new Client({
-    user: process.env.DB_USER,
+    user: process.env.DB_USERNAME,
     host: process.env.DB_HOST,
     database: process.env.DB_DATABASE,
     password: process.env.DB_PASSWORD,
