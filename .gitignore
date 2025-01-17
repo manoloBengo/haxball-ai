@@ -4,7 +4,6 @@ postgre_superuser_password.txt
 user_and_password_SQL.txt
 
 # Carpetas a ignorar
-node_modules
 not_for_git/
 consultas_sql/
 
