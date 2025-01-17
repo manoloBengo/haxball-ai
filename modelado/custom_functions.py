@@ -65,14 +65,14 @@ def plot_ball_heatmaps_for_team_goal(equipo, title_prefix, data_pos, data_groupe
 
 # Funciones para el filtrado -------------------------------------------------------------------------------
 
-def analizar_filtrado(data_filtros, data_posiciones_rows, data_posiciones_filtered_rows, previous_shape_rows):
+def analizar_filtrado(nombre_del_filtro, data_filtros, data_posiciones_rows, data_posiciones_filtered_rows, previous_shape_rows):
     print("Cantidad de filas que quedaron luego del filtrado:", data_posiciones_filtered_rows)
     print("Porcentaje de filas que quedan del dataset original:", round((data_posiciones_filtered_rows/data_posiciones_rows*100), 2),"%")
     print("Porcentaje de filas que quedan del dataset filtrado anterior:", round((data_posiciones_filtered_rows/previous_shape_rows*100), 2),"%")
     
      # Guardo la informacion en el dataframe de filtrado
     fila = {
-        'filtro': 'criterio del 90%',
+        'filtro': nombre_del_filtro,
         'cant_de_momentos': data_posiciones_filtered_rows,
         '%_respecto_a_original': round((data_posiciones_filtered_rows/data_posiciones_rows*100), 2),
         '%_respecto_a_anterior': round((data_posiciones_filtered_rows/previous_shape_rows*100), 2)
