@@ -6,6 +6,7 @@ user_and_password_SQL.txt
 # Carpetas a ignorar
 not_for_git/
 consultas_sql/
+node_modules/
 
 # Sistema operativo Windows
 Thumbs.db
