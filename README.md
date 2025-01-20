@@ -28,20 +28,20 @@ Archivo JavaScript que genera el servidor de HaxBall. Este archivo debe ejecutar
 
 - Usar **Microsoft Edge** para ejecutar el archivo `server.js` del servidor de HaxBall en la consola del navegador.
 
-## Instalación y Configuración (reescribir esta seccion con lo del Notion, esto es un vago resumen)
+## Instalación y Configuración
 
 1. **Backend**:
-   - Asegúrate de tener Node.js instalado.
-   - Instala las dependencias necesarias ejecutando `npm install` en la carpeta `/backend`.
-   - Configura las variables de entorno en un archivo `.env` en la carpeta `/backend`.
-   - Inicia el servidor con `node server.js`.
+   - Instalar Node.js.
+   - Instalar las dependencias necesarias con el comando `npm install` en la carpeta `/backend` desde tu consola.
+   - Declarar las variables de entorno en un archivo `.env` dentro de la carpeta `/backend`.
+   - Iniciar el servidor con `node server.js` desde tu consola.
 
 2. **Base de Datos**:
-   - Configura y asegúrate de tener una base de datos PostgreSQL.
-   - Actualiza las credenciales en el archivo `.env`.
+   - Configurar una base de datos PostgreSQL.
+   - Actualizar las credenciales en el archivo `.env`.
 
 3. **Modelado**:
-   - Usa Jupyter Notebooks para abrir y ejecutar los notebooks en la carpeta `/modelado`.
+   - Usar Jupyter Notebooks para ejecutar los notebooks de la carpeta `/modelado`.
 
 ## Uso
 
@@ -55,4 +55,24 @@ Archivo JavaScript que genera el servidor de HaxBall. Este archivo debe ejecutar
 3. **Modelado**:
    - Crea y entrena modelos utilizando los datos filtrados en los notebooks dentro de la carpeta `/modelado`.
 
-## Licencia
+## Estructura de los datos
+1. **Servidor Haxball Headless (JavaScript)**:
+   - Captura los eventos del juego (`onGameTick`, `onPlayerChat`, etc.).
+   - Recolecta los datos necesarios: posiciones de jugadores, pelota, y otros eventos.
+   - Envía estos datos a un servidor backend mediante una solicitud HTTP o WebSocket.
+
+2. **Servidor Backend (Node.js + SQL)**:
+   - Escucha los datos que envía el servidor de Haxball.
+   - Inserta los datos en una base de datos SQL.
+
+3. **Base de Datos SQL**:
+   - Guarda los datos del partido, jugadores, equipos y posiciones.
+  
+
+
+
+
+
+
+
+
