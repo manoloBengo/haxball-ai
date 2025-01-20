@@ -1,7 +1,7 @@
 // Inicio del servidor --------------
 var room = HBInit({
-    roomName: "3v3 picante ??",
-    maxPlayers: 9,
+    roomName: "3v3 a los pases",
+    maxPlayers: 10,
     public: true,
     noPlayer: true
 });
