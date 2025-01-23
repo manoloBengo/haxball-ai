@@ -4,9 +4,16 @@ import pandas as pd
 from collections import Counter
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import learning_curve
 
 
 def modelar_red_neuronal_001(
@@ -15,7 +22,8 @@ def modelar_red_neuronal_001(
     data_posiciones_grouped_filtered_labeled,
     data_posiciones_filtered,
     data_posiciones_filtered_original,
-    gol_n_ticks
+    gol_n_ticks,
+    gridsearchCv_bool # Para indicar si se quiere hacer el gridsearch + cross validation
     ):
     
     # ------------------------------ PREPARACION Y BALANCEO DE CLASES ----------------------------------------------
@@ -97,7 +105,7 @@ def modelar_red_neuronal_001(
     # --------------------------------- ENTRENAMIENTO DEL MODELO ----------------------------------------------
     
     # Crear el modelo
-    modelo = MLPClassifier(alpha=0.001, hidden_layer_sizes=(256, 128, 64), learning_rate_init=0.001, activation='relu', solver='adam', max_iter=500, random_state=random_state)
+    modelo = MLPClassifier(alpha=0.01, hidden_layer_sizes=(256, 128, 64), learning_rate_init=0.001, activation='relu', solver='adam', max_iter=500, random_state=random_state)
 
     # Entrenar el modelo
     modelo.fit(X_train, y_train)
@@ -249,3 +257,239 @@ def modelar_red_neuronal_001(
 
     plt.tight_layout()
     plt.show()
+    
+    # --------------------- GRAFICO DE CURVAS DE APRENDIZAJE DEL MODELO ------------------------------
+
+
+    # Generar curvas de aprendizaje
+    train_sizes, train_scores, test_scores = learning_curve(
+        modelo, X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1,
+        train_sizes=np.linspace(0.1, 1.0, 10)
+    )
+
+    # Calcular promedios y desviaciones estándar
+    train_mean = np.mean(train_scores, axis=1)
+    train_std = np.std(train_scores, axis=1)
+    test_mean = np.mean(test_scores, axis=1)
+    test_std = np.std(test_scores, axis=1)
+
+    # Graficar
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_sizes, train_mean, 'o-', color="r", label="Precisión en Entrenamiento")
+    plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="r")
+    plt.plot(train_sizes, test_mean, 'o-', color="g", label="Precisión en Validación")
+    plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="g")
+    plt.title("Curvas de Aprendizaje")
+    plt.xlabel("Tamaño del conjunto de entrenamiento")
+    plt.ylabel("Precisión")
+    plt.legend(loc="best")
+    plt.grid()
+    plt.show()
+
+    
+    # --------------------------------- GRIDSEARCH CV ----------------------------------------
+    
+    if gridsearchCv_bool:
+        
+        custom_class_weight = {
+            -1: 2,  # Gol del equipo Red (favorecido)
+            0: 1,  # Ningún gol
+            1: 2   # Gol del equipo Blue (favorecido)
+        }
+        
+        # Definir los parámetros a probar
+        param_grid = {
+            'hidden_layer_sizes': [(128, 64, 32), (64, 32), (128, 128), (256, 128, 64)],
+            'alpha': [0.001, 0.01, 0.1],
+            'learning_rate_init': [0.001, 0.01]
+        }
+
+        # Configurar la búsqueda en cuadrícula con validación cruzada
+        grid_search = GridSearchCV(MLPClassifier(max_iter=500, random_state=random_state), param_grid, cv=5)
+
+        # Ajustar el modelo con los datos
+        grid_search.fit(X, y)
+
+
+        results_df = pd.DataFrame(grid_search.cv_results_)
+
+        # Seleccionar columnas relevantes para mostrar los resultados
+        results_df = results_df[['params', 'mean_test_score', 'rank_test_score']]
+
+        # Ordenar por la puntuación media en orden descendente
+        results_df = results_df.sort_values(by='mean_test_score', ascending=False)
+
+        # Mostrar las 10 mejores combinaciones
+        print("Top 10 combinaciones de parámetros:")
+        print(results_df.head(10))
+
+        # Mostrar todas las combinaciones ordenadas
+        print("\nTodas las combinaciones de parámetros ordenadas por puntuación:")
+        print(results_df)
+
+
+        # Ver la mejor puntuación obtenida
+        print("Mejor puntuación:", grid_search.best_score_)
+        
+        # Mejor modelo encontrado
+        best_model = grid_search.best_estimator_
+        
+        # Obtener los mejores hiperparámetros
+        mejores_parametros = grid_search.best_params_
+        print("Mejores parámetros encontrados:", mejores_parametros)
+
+        # Obtener todos los parámetros del mejor modelo
+        todos_los_parametros = best_model.get_params()
+        print("Todos los parámetros del mejor modelo:")
+        for parametro, valor in todos_los_parametros.items():
+            print(f"{parametro}: {valor}")
+
+        # Hacer predicciones con el conjunto de prueba
+        y_pred = best_model.predict(X_test)
+
+        # Evaluar el modelo con un reporte de clasificación
+        print("Reporte de clasificación con el mejor modelo:\n", classification_report(y_test, y_pred))
+        
+        # ----------------- MATRIZ DE CONFUSION (Grid Search + CV) --------------------
+        
+        print('')
+        print('MATRIZ DE CONFUSION:')
+        print('')
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(conf_matrix, annot=True, cmap='viridis', fmt='d', cbar=False,
+                    xticklabels=['Gol Blue', 'Gol Red', 'Ningún gol'],
+                    yticklabels=['Gol Blue', 'Gol Red', 'Ningún gol'])
+        plt.xlabel('Predicción')
+        plt.ylabel('Verdadero')
+        plt.title('Matriz de Confusión')
+        plt.show()
+    
+        
+        # --- GRAFICO DE 20 MOMENTOS AL AZAR Y LAS PREDICCIONES DEL MODELO (Grid Search + CV) ---
+    
+        print('')
+        print('GRAFICO DE 20 MOMENTOS AL AZAR Y LAS PREDICCIONES DEL MODELO:')
+        print('')
+       
+        # Dataframe para graficar posteriormente
+        resultados_gs = pd.DataFrame({
+            'indice_original': indices_test,
+            'valor_real': y_test,
+            'valor_predicho': y_pred
+        })
+        
+        # Obtener las probabilidades de las predicciones en el conjunto de prueba
+        probabilidades_gs = best_model.predict_proba(X_test)
+
+        # Convertir las probabilidades a un DataFrame
+        probabilidades_gs_df = pd.DataFrame(probabilidades_gs, columns=['%Blue', '%Red', '%None'])
+        probabilidades_gs_df = probabilidades_gs_df.round(5)
+
+        # Agregar las columnas de valor real
+        probabilidades_gs_df['Valor real'] = y_test
+
+        # Reorganizar las columnas
+        probabilidades_gs_df = probabilidades_gs_df[['Valor real', '%Blue', '%Red', '%None']]
+
+        # Mostrar todas las filas (en Jupyter Notebook, muestra todas)
+        pd.set_option('display.max_rows', None)
+        probabilidades_gs_df_sample_20 = probabilidades_gs_df.sample(20, random_state=random_state).reset_index()
+        
+       
+        probabilidades_gs_df_filtered = probabilidades_gs_df.drop(columns=['Valor real'])
+        resultados_gs_concat = pd.concat([resultados_gs, probabilidades_df_filtered], axis=1)
+
+        # Formateo valores para plotear
+        resultados_gs_concat['%Blue'] = resultados_gs_concat['%Blue'].apply(lambda x: f"{round(x,4)*100:.2f}")
+        resultados_gs_concat['%None'] = resultados_gs_concat['%None'].apply(lambda x: f"{round(x, 4)*100:.2f}")
+        resultados_gs_concat['%Red'] = resultados_gs_concat['%Red'].apply(lambda x: f"{round(x, 4)*100:.2f}")
+        
+        data_posiciones_filtered_original_sample = data_posiciones_filtered_original[data_posiciones_filtered_original['match_time'].isin(indices_test)]
+        unique_moments = data_posiciones_filtered_original_sample[['match_time']].drop_duplicates()
+        random_moments = unique_moments.sample(n=20, random_state=random_state)
+
+        # Crear subplots
+        fig, axs = plt.subplots(10, 2, figsize=(12, 30))
+        axs = axs.ravel()  # Aplanar el array de ejes para facilitar el acceso
+
+        # Filtrar y graficar los datos para cada momento seleccionado
+        for i, (index, moment) in enumerate(random_moments.iterrows()):
+            match_time = moment['match_time']
+            
+            # Filtrar datos para el momento actual
+            moment_data = data_posiciones_filtered_original[(data_posiciones_filtered_original['match_time'] == match_time)]
+            
+            # Graficar los datos en el subplot correspondiente
+            ax = axs[i]
+            ax.imshow(background_image, extent=[-605, 605, -255, 255], aspect='auto')
+            
+            # Asignar colores y tamaños según el equipo
+            colors = moment_data['team'].astype(str).map({'0': 'white', '1': 'red', '2': 'blue'})
+            sizes = moment_data['team'].astype(str).map({'0': 25, '1': 100, '2': 100})
+
+            scatter = ax.scatter(moment_data['x'], moment_data['y'], c=colors, s=sizes, edgecolors='black')
+
+            # Agregar flechas que indican la velocidad de cada jugador/pelota
+            for j, row in moment_data.iterrows():
+                x_pos = row['x']
+                y_pos = row['y']
+                v_x = row['velocity_x']
+                v_y = row['velocity_y']
+                
+                # Calcular la longitud de la flecha (norma de la velocidad)
+                speed = np.sqrt(v_x**2 + v_y**2) * 0.001
+                
+                # La escala de las flechas (ajustar este factor según sea necesario)
+                arrow_scale = 2
+                
+                # Agregar la flecha con 'quiver'
+                ax.quiver(x_pos, y_pos, v_x, v_y, angles='xy', scale_units='xy', scale=arrow_scale, color='#242424',
+                         width=0.004)
+
+            valor_real = resultados_gs.loc[(resultados_gs['indice_original'] == match_time), 'valor_real'].values[0]
+            valor_predicho_red = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%Red'].values[0]
+            valor_predicho_none = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%None'].values[0]
+            valor_predicho_blue = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%Blue'].values[0]
+            
+            ax.set_title(f'Match - Time: {match_time}\n Predicted: Red:{valor_predicho_red}%, none:{valor_predicho_none}%, Blue:{valor_predicho_blue}%\n Real: {valor_real}')
+            ax.set_xlim([-605, 605])
+            ax.set_ylim([-255, 255])
+            ax.axis('off')  # Opcional: para ocultar los ejes
+
+        plt.tight_layout()
+        plt.show()
+        
+        # --------------------- GRAFICO DE CURVAS DE APRENDIZAJE DEL MODELO ------------------------------
+
+
+        # Generar curvas de aprendizaje
+        train_sizes, train_scores, test_scores = learning_curve(
+            best_model, X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1,
+            train_sizes=np.linspace(0.1, 1.0, 10)
+        )
+
+        # Calcular promedios y desviaciones estándar
+        train_mean = np.mean(train_scores, axis=1)
+        train_std = np.std(train_scores, axis=1)
+        test_mean = np.mean(test_scores, axis=1)
+        test_std = np.std(test_scores, axis=1)
+
+        # Graficar
+        plt.figure(figsize=(10, 6))
+        plt.plot(train_sizes, train_mean, 'o-', color="r", label="Precisión en Entrenamiento")
+        plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.1, color="r")
+        plt.plot(train_sizes, test_mean, 'o-', color="g", label="Precisión en Validación")
+        plt.fill_between(train_sizes, test_mean - test_std, test_mean + test_std, alpha=0.1, color="g")
+        plt.title("Curvas de Aprendizaje")
+        plt.xlabel("Tamaño del conjunto de entrenamiento")
+        plt.ylabel("Precisión")
+        plt.legend(loc="best")
+        plt.grid()
+        plt.show()
+    
+        # --- GRAFICO DE TODOS LOS MOMENTOS DE UN PARTIDO AL AZAR Y LAS PREDICCIONES DEL MODELO (Grid Search + CV) ---
+        
+        #(HACER)
+        
+    print('Listo.')
