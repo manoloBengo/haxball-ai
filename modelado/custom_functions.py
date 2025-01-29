@@ -63,6 +63,50 @@ def plot_ball_heatmaps_for_team_goal(equipo, title_prefix, data_pos, data_groupe
     plt.show()
 
 
+
+
+def plotear_partido_entero(data_posiciones, background_image, custom_match_id):
+
+    # Filtrar todos los momentos de ese partido
+    match_data = data_posiciones[data_posiciones['match_id'] == custom_match_id].sort_values('time')
+    
+    # Extraer los ticks únicos
+    ticks = match_data['time'].unique()
+    print('Cantidad de ticks (momentos) captados:',len(ticks))
+    print('')
+
+    fig, axs = plt.subplots(len(ticks), 1, figsize=(6, len(ticks) * 3))
+    axs = axs.ravel()  # Aplanar el array de ejes para facilitar el acceso
+
+    
+    # Iterar sobre cada tick y mostrar el gráfico correspondiente
+    for i, frame in enumerate(ticks):
+        # Filtrar datos para el momento actual
+        moment_data = match_data[match_data['time'] == frame]
+        
+        # Graficar los datos en el subplot correspondiente
+        ax = axs[i]
+        ax.imshow(background_image, extent=[-605, 605, -255, 255], aspect='auto')
+        
+        # Asignar colores y tamaños según el equipo
+        colors = moment_data['team'].map({0: 'white', 1: 'red', 2: 'blue'})
+        sizes = moment_data['team'].map({0: 25, 1: 100, 2: 100})
+        
+        scatter = ax.scatter(moment_data['x'], moment_data['y'], c=colors, s=sizes, edgecolors='black')
+        ax.set_title(f'Match ID: {custom_match_id}, Tick: {frame}')
+        ax.set_xlim([-605, 605])
+        ax.set_ylim([-255, 255])
+        ax.axis('off')  # Opcional: para ocultar los ejes
+        
+    # Mostrar el gráfico
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
+
 # Funciones para el filtrado -------------------------------------------------------------------------------
 
 def analizar_filtrado(nombre_del_filtro, data_filtros, data_posiciones_rows, data_posiciones_filtered_rows, previous_shape_rows):
