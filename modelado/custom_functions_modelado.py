@@ -5,7 +5,7 @@ from collections import Counter
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -726,7 +726,7 @@ def modelar_random_forest_002(
         
 
         # Configurar y realizar GridSearch
-        grid_search_rf = GridSearchCV(RandomForestClassifier(random_state=random_state), custom_param_grid_rf, n_jobs=3, cv=5)
+        grid_search_rf = GridSearchCV(RandomForestClassifier(random_state=random_state), custom_param_grid_rf, n_jobs=8, cv=5)
         
         # Ajustar el modelo con los datos
         grid_search_rf.fit(X, y)
@@ -970,4 +970,410 @@ def modelar_random_forest_002(
         plt.savefig(ruta)
         
         plt.show()
+        
+    print('Listo')
     
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+def modelar_tensorflow_003(
+    random_state,
+    background_image,
+    data_posiciones_grouped_filtered_labeled,
+    data_posiciones_filtered,
+    data_posiciones_filtered_original,
+    gol_n_ticks
+    
+    ):
+    
+    
+    import pandas as pd
+    import numpy as np
+    from sklearn import model_selection, ensemble, linear_model, neural_network, metrics, inspection
+
+    import matplotlib.pyplot as plt
+    from combat.pycombat import pycombat
+    from pickle import load, dump
+
+    import os
+
+    if True:
+            # ---------------------------- CARGO EL ID DEL MODELO Y CREO SU CARPETA ----------------------------------------
+        
+            id_modelo = cf_c.leer_contador("contador_de_modelos.txt")
+            tipo_de_modelo = "_TensorFlow003_"
+            variable_carpeta = f"models/{id_modelo}{tipo_de_modelo}{gol_n_ticks}"
+            
+            # ----------------- DEFINO CARPETA DONDE SE GUARDARAN LOS GRAFICOS Y RESULTADOS --------------------------------
+        
+            os.makedirs(variable_carpeta, exist_ok=True)
+            carpeta_resultados = f"{variable_carpeta}/"
+        
+            print(f"El id del modelo es {id_modelo}.\n Sus resultados se guardarán en la carpeta: {carpeta_resultados}")
+            
+            # ------------------------------ PREPARACION Y BALANCEO DE CLASES ----------------------------------------------
+            
+            # Creación de la clave combinada
+            data_posiciones_grouped_filtered_labeled['match_time'] = data_posiciones_grouped_filtered_labeled['match_id'].astype(str) + '_' + data_posiciones_grouped_filtered_labeled['time'].astype(str)
+            data_posiciones_filtered['match_time'] = data_posiciones_filtered['match_id'].astype(str) + '_' + data_posiciones_filtered['time'].astype(str)
+            
+            # Separación de clases para balanceo
+            indices_nada = data_posiciones_grouped_filtered_labeled[data_posiciones_grouped_filtered_labeled[gol_n_ticks] == 'none'].index
+            indices_gol_rojo = data_posiciones_grouped_filtered_labeled[data_posiciones_grouped_filtered_labeled[gol_n_ticks] == 'Red'].index
+            indices_gol_azul = data_posiciones_grouped_filtered_labeled[data_posiciones_grouped_filtered_labeled[gol_n_ticks] == 'Blue'].index
+        
+            # Determinar la cantidad a muestrear para balancear
+            n = 2 # proporcion de None vs Red(Blue)
+            num_muestras_gol = min(len(indices_gol_rojo), len(indices_gol_azul), len(indices_nada)/n)
+            num_muestras_nada = num_muestras_gol * n
+        
+            # Muestreo balanceado de combinaciones match_time
+            indices_nada_balanceados = resample(indices_nada, n_samples=num_muestras_nada, replace=False, random_state=random_state)
+            indices_gol_rojo_balanceados = resample(indices_gol_rojo, n_samples=num_muestras_gol, replace=False, random_state=random_state)
+            indices_gol_azul_balanceados = resample(indices_gol_azul, n_samples=num_muestras_gol, replace=False, random_state=random_state)
+            
+            
+            # Combinar los índices balanceados
+            indices_balanceados = np.concatenate([indices_nada_balanceados, indices_gol_rojo_balanceados, indices_gol_azul_balanceados])
+            rng  = np.random.default_rng(random_state)
+            rng.shuffle(indices_balanceados)
+        
+            # Seleccionar los datos balanceados
+            data_balanceada = data_posiciones_grouped_filtered_labeled.loc[indices_balanceados]
+        
+        
+            # Construir los vectores de características (X) y etiquetas (y)
+            X = []
+            y = []
+            indices_X_y = []
+        
+            for row in data_balanceada.itertuples():
+                match_time = row.match_time
+                gol_N_ticks = getattr(row, gol_n_ticks)
+                
+                # Seleccionar las 7 filas correspondientes
+                subset = data_posiciones_filtered[data_posiciones_filtered['match_time'] == match_time]
+                if len(subset) == 7:  # Asegurarse de tener las 7 filas
+                    input_data = subset[['x', 'y', 'velocity_x', 'velocity_y', 'team']].values.flatten()
+                    X.append(input_data)
+                    y.append(gol_N_ticks)
+                    indices_X_y.append(match_time)
+                else:
+                    print(f"Advertencia: {match_time} no tiene 7 filas.")
+        
+            X = np.array(X)
+            y = np.array(y)
+            indices_X_y = np.array(indices_X_y)
+            
+            print('')
+            print('Algunas datos de X:\n', X[0:2])
+            print('')
+            print('Algunos datos de y:\n',y[0:2])
+            print('')
+            print("Distribución balanceada de clases:\n", Counter(y))
+            print('')
+            print("Algunos indices de X e y:\n", indices_X_y[:5])
+            
+            # ------------------------- DIVISION DE DATOS DE ENTRENAMIENTO Y TESTEO ----------------------------------------------
+            
+            # Dividir los datos para el entrenamiento y testeo del modelo
+            X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(X, y, indices_X_y, test_size=0.3, random_state=random_state, stratify=y) # stratify=y hace que se mantenga las proporciones
+            
+            print('')
+            print(Counter(y_train))
+            print('')
+            print(Counter(y_test))
+            print('')
+            print("Índices correspondientes a y_test:\n", indices_test[:5])
+            
+           
+
+            # --- Librerias del modelo ---
+            import tensorflow as tf
+            from tensorflow import keras
+            from tensorflow.keras import layers, regularizers
+            import pandas as pd
+            import numpy as np
+            import os
+            from sklearn.model_selection import train_test_split
+            from sklearn.preprocessing import StandardScaler, LabelEncoder
+            import keras_tuner as kt
+
+
+            # Verificar que TensorFlow está utilizando solamente la CPU
+            if not tf.config.list_physical_devices('GPU'):
+                print("TensorFlow está configurado para usar únicamente la CPU.")
+            else:
+                print("Advertencia: TensorFlow está utilizando la GPU.")
+
+
+
+            # Codificar etiquetas
+            encoder = LabelEncoder()
+            y_train = encoder.fit_transform(y_train)
+            y_test = encoder.transform(y_test)
+
+
+            # Normalizar datos
+            scaler = StandardScaler()
+            X_train = scaler.fit_transform(X_train)
+            X_test = scaler.transform(X_test)
+
+
+            # Guardar encoder y scaler
+            with open(variable_carpeta), "wb") as f:
+                pickle.dump(encoder, f)
+
+            with open(variable_carpeta, "wb") as f:
+                pickle.dump(scaler, f)
+
+            
+            # --- Defino el modelo ---
+            def build_model(hp):
+                model = keras.Sequential()
+                model.add(layers.Input(shape=(X_train.shape[1],)))
+                
+                # Número de capas ocultas
+                for i in range(hp.Int('num_layers', 2, 5)):  # Mínimo 2, máximo 5 capas
+                    model.add(layers.Dense(
+                        hp.Int(f'units_{i}', 64, 256, step=32),  # Más unidades por capa
+                        activation=hp.Choice('activation', ['relu', 'selu', 'tanh', 'swish']),
+                        kernel_regularizer=regularizers.l2(hp.Float('l2_reg', 1e-5, 1e-2, sampling='LOG'))  # Regularización L2
+                    ))
+                    model.add(layers.BatchNormalization())
+                    model.add(layers.Dropout(hp.Float(f'dropout_{i}', 0.2, 0.5, step=0.1)))  # Mayor dropout
+                
+                # Capa de salida
+                model.add(layers.Dense(len(np.unique(y)), activation='softmax'))
+                
+                # Selección de optimizador
+                optimizer_name = hp.Choice('optimizer', ['adam', 'rmsprop', 'sgd'])
+                learning_rate = hp.Choice('learning_rate', [1e-2, 1e-3, 1e-4, 1e-5])
+
+                if optimizer_name == 'adam':
+                    optimizer = keras.optimizers.Adam(learning_rate=learning_rate, decay=hp.Float('decay', 1e-6, 1e-3, sampling='LOG'))
+                elif optimizer_name == 'rmsprop':
+                    optimizer = keras.optimizers.RMSprop(learning_rate=learning_rate, rho=hp.Float('rho', 0.8, 0.99), momentum=hp.Float('momentum', 0.0, 0.9))
+                else:
+                    optimizer = keras.optimizers.SGD(learning_rate=learning_rate, momentum=hp.Float('momentum_sgd', 0.0, 0.9), nesterov=True)
+
+                # Función de pérdida adaptativa
+                loss_fn = 'sparse_categorical_crossentropy' if len(np.unique(y)) > 2 else 'binary_crossentropy'
+
+                model.compile(
+                    optimizer=optimizer,
+                    loss=loss_fn,
+                    metrics=['accuracy']
+                )
+
+                return model
+            
+            
+            # Configuración de búsqueda de hiperparámetros
+            tuner = kt.Hyperband(
+                build_model,
+                objective='val_accuracy',
+                max_epochs=100,  # Más épocas
+                factor=3,
+                directory=carpeta_resultados,
+                project_name='hyperparam_tuning'
+            )
+            
+            
+            # Ejecución de la búsqueda de hiperparámetros
+            tuner.search(
+                X_train, y_train,
+                validation_data=(X_test, y_test),
+                epochs=100  # Más entrenamiento
+            )
+            
+            
+            # Seleccionar el mejor modelo
+            best_hps = tuner.get_best_hyperparameters()[0]
+            best_model = tuner.hypermodel.build(best_hps)
+            history = best_model.fit(
+                X_train, y_train,
+                validation_data=(X_test, y_test),
+                epochs=100  # Más entrenamiento final
+            )
+            
+            
+            # Guardar el mejor modelo
+            modelo_path = f"{carpeta_resultados}best_model.h5"
+            best_model.save(modelo_path)
+            print("Entrenamiento finalizado y mejor modelo guardado.")
+
+
+
+
+
+            # ---------------------------- Resultados ---------------------------------
+
+
+            # Obtener predicciones
+            y_pred_prob = best_model.predict(X_test)
+            y_pred = np.argmax(y_pred_prob, axis=1)
+            y_true = y_test
+             
+            # Matriz de confusión
+            cm = confusion_matrix(y_true, y_pred)
+            plt.figure(figsize=(6,5))
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=np.unique(y_true), yticklabels=np.unique(y_true))
+            plt.xlabel('Predicted')
+            plt.ylabel('True')
+            plt.title('Confusion Matrix')
+            
+            ruta=os.path.join(variable_carpeta, "matriz_de_confusion.png")
+            plt.savefig(ruta)
+               
+            # Reporte de clasificación
+
+            from sklearn.metrics import classification_report
+
+            print("Classification Report:")
+            print(classification_report(y_true, y_pred))
+                
+                
+            # ---------------------- Curvas de aprendizaje -----------------------
+
+            plt.figure(figsize=(12,5))
+
+            # Pérdida
+            plt.subplot(1,2,1)
+            plt.plot(history.history['loss'], label='Train Loss')
+            plt.plot(history.history.get('val_loss', []), label='Validation Loss')
+            plt.xlabel('Epochs')
+            plt.ylabel('Loss')
+            plt.legend()
+            plt.title('Loss Curve')
+
+            # Precisión
+            plt.subplot(1,2,2)
+            plt.plot(history.history['accuracy'], label='Train Accuracy')
+            plt.plot(history.history.get('val_accuracy', []), label='Validation Accuracy')
+            plt.xlabel('Epochs')
+            plt.ylabel('Accuracy')
+            plt.legend()
+            plt.title('Accuracy Curve')
+
+            ruta=os.path.join(variable_carpeta, "curvas_de_aprendizaje.png")
+            plt.savefig(ruta)
+            
+            
+            
+            # --- GRAFICO DE 20 MOMENTOS AL AZAR Y LAS PREDICCIONES DEL MODELO (Grid Search + CV) ---
+    
+            print('')
+            print('GRAFICO DE 20 MOMENTOS AL AZAR Y LAS PREDICCIONES DEL MODELO:')
+            print('')
+           
+            # Dataframe para graficar posteriormente
+            resultados_gs = pd.DataFrame({
+                'indice_original': indices_test,
+                'valor_real': y_test,
+                'valor_predicho': y_pred
+            })
+            
+            # Obtener las probabilidades de las predicciones en el conjunto de prueba
+            probabilidades_gs = best_model.predict_proba(X_test)
+
+            # Convertir las probabilidades a un DataFrame
+            probabilidades_gs_df = pd.DataFrame(probabilidades_gs, columns=['%Blue', '%Red', '%None'])
+            probabilidades_gs_df = probabilidades_gs_df.round(5)
+
+            # Agregar las columnas de valor real
+            probabilidades_gs_df['Valor real'] = y_test
+
+            # Reorganizar las columnas
+            probabilidades_gs_df = probabilidades_gs_df[['Valor real', '%Blue', '%Red', '%None']]
+
+            # Mostrar todas las filas (en Jupyter Notebook, muestra todas)
+            pd.set_option('display.max_rows', None)
+            probabilidades_gs_df_sample_20 = probabilidades_gs_df.sample(20, random_state=random_state).reset_index()
+            
+           
+            probabilidades_gs_df_filtered = probabilidades_gs_df.drop(columns=['Valor real'])
+            resultados_gs_concat = pd.concat([resultados_gs, probabilidades_gs_df_filtered], axis=1)
+
+            # Formateo valores para plotear
+            resultados_gs_concat['%Blue'] = resultados_gs_concat['%Blue'].apply(lambda x: f"{round(x,4)*100:.2f}")
+            resultados_gs_concat['%None'] = resultados_gs_concat['%None'].apply(lambda x: f"{round(x, 4)*100:.2f}")
+            resultados_gs_concat['%Red'] = resultados_gs_concat['%Red'].apply(lambda x: f"{round(x, 4)*100:.2f}")
+            
+            data_posiciones_filtered_original_sample = data_posiciones_filtered_original[data_posiciones_filtered_original['match_time'].isin(indices_test)]
+            unique_moments = data_posiciones_filtered_original_sample[['match_time']].drop_duplicates()
+            random_moments = unique_moments.sample(n=20, random_state=random_state)
+
+            # Crear subplots
+            fig, axs = plt.subplots(10, 2, figsize=(12, 30))
+            axs = axs.ravel()  # Aplanar el array de ejes para facilitar el acceso
+
+            # Filtrar y graficar los datos para cada momento seleccionado
+            for i, (index, moment) in enumerate(random_moments.iterrows()):
+                match_time = moment['match_time']
+                
+                # Filtrar datos para el momento actual
+                moment_data = data_posiciones_filtered_original[(data_posiciones_filtered_original['match_time'] == match_time)]
+                
+                # Graficar los datos en el subplot correspondiente
+                ax = axs[i]
+                ax.imshow(background_image, extent=[-605, 605, -255, 255], aspect='auto')
+                
+                # Asignar colores y tamaños según el equipo
+                colors = moment_data['team'].astype(str).map({'0': 'white', '1': 'red', '2': 'blue'})
+                sizes = moment_data['team'].astype(str).map({'0': 25, '1': 100, '2': 100})
+
+                scatter = ax.scatter(moment_data['x'], moment_data['y'], c=colors, s=sizes, edgecolors='black')
+
+                # Agregar flechas que indican la velocidad de cada jugador/pelota
+                for j, row in moment_data.iterrows():
+                    x_pos = row['x']
+                    y_pos = row['y']
+                    v_x = row['velocity_x']
+                    v_y = row['velocity_y']
+                    
+                    # Calcular la longitud de la flecha (norma de la velocidad)
+                    speed = np.sqrt(v_x**2 + v_y**2) * 0.001
+                    
+                    # La escala de las flechas (ajustar este factor según sea necesario)
+                    arrow_scale = 2
+                    
+                    # Agregar la flecha con 'quiver'
+                    ax.quiver(x_pos, y_pos, v_x, v_y, angles='xy', scale_units='xy', scale=arrow_scale, color='#242424',
+                             width=0.004)
+
+                valor_real = resultados_gs.loc[(resultados_gs['indice_original'] == match_time), 'valor_real'].values[0]
+                valor_predicho_red = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%Red'].values[0]
+                valor_predicho_none = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%None'].values[0]
+                valor_predicho_blue = resultados_gs_concat.loc[(resultados_gs['indice_original'] == match_time), '%Blue'].values[0]
+                
+                ax.set_title(f'Match - Time: {match_time}\n Predicted: Red:{valor_predicho_red}%, none:{valor_predicho_none}%, Blue:{valor_predicho_blue}%\n Real: {valor_real}')
+                ax.set_xlim([-605, 605])
+                ax.set_ylim([-255, 255])
+                ax.axis('off')  # Opcional: para ocultar los ejes
+
+            plt.tight_layout()
+
+            ruta=os.path.join(variable_carpeta, "20_momentos_vs_modelo.png")
+            plt.savefig(ruta)
+            
+            plt.show()
+            
+            
+            
+            
+    print('Listo!')
+
