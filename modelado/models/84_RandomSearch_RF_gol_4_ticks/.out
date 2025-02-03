@@ -1,0 +1,87 @@
+
+Top 10 combinaciones de parámetros:
+                                                                                                                                                                                                                                                                   params  mean_test_score  rank_test_score
+                              {'warm_start': True, 'oob_score': False, 'n_estimators': 1000, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_samples': 0.9, 'max_features': 'log2', 'max_depth': 15, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.632929                1
+                               {'warm_start': False, 'oob_score': False, 'n_estimators': 500, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': None, 'max_features': 'log2', 'max_depth': 15, 'criterion': 'gini', 'class_weight': None, 'bootstrap': False}         0.630447                2
+                                  {'warm_start': False, 'oob_score': True, 'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': 0.8, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.628477                3
+{'warm_start': True, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_samples': None, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.624025                4
+{'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_samples': None, 'max_features': 0.75, 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.624025                5
+                              {'warm_start': True, 'oob_score': True, 'n_estimators': 1000, 'min_samples_split': 5, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.623538                6
+                               {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 10, 'max_samples': None, 'max_features': 0.5, 'max_depth': 20, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.623534                7
+                                   {'warm_start': False, 'oob_score': True, 'n_estimators': 1000, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_samples': 0.8, 'max_features': 0.75, 'max_depth': 5, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.622543                8
+        {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': 0.9, 'max_features': 0.5, 'max_depth': 15, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.621559                9
+                                {'warm_start': True, 'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': None, 'max_depth': None, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.621557               10
+
+Todas las combinaciones de parámetros ordenadas por puntuación:
+                                                                                                                                                                                                                                                                    params  mean_test_score  rank_test_score
+                               {'warm_start': True, 'oob_score': False, 'n_estimators': 1000, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_samples': 0.9, 'max_features': 'log2', 'max_depth': 15, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.632929                1
+                                {'warm_start': False, 'oob_score': False, 'n_estimators': 500, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': None, 'max_features': 'log2', 'max_depth': 15, 'criterion': 'gini', 'class_weight': None, 'bootstrap': False}         0.630447                2
+                                   {'warm_start': False, 'oob_score': True, 'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': 0.8, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.628477                3
+ {'warm_start': True, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 4, 'max_samples': None, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.624025                4
+ {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_samples': None, 'max_features': 0.75, 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.624025                5
+                               {'warm_start': True, 'oob_score': True, 'n_estimators': 1000, 'min_samples_split': 5, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.623538                6
+                                {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 10, 'max_samples': None, 'max_features': 0.5, 'max_depth': 20, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.623534                7
+                                    {'warm_start': False, 'oob_score': True, 'n_estimators': 1000, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_samples': 0.8, 'max_features': 0.75, 'max_depth': 5, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.622543                8
+         {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': 0.9, 'max_features': 0.5, 'max_depth': 15, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.621559                9
+                                 {'warm_start': True, 'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': None, 'max_depth': None, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.621557               10
+                             {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 10, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': 0.75, 'max_depth': None, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': True}         0.620568               11
+                                       {'warm_start': True, 'oob_score': True, 'n_estimators': 200, 'min_samples_split': 5, 'min_samples_leaf': 2, 'max_samples': 0.8, 'max_features': 0.75, 'max_depth': 5, 'criterion': 'gini', 'class_weight': None, 'bootstrap': True}         0.618589               12
+     {'warm_start': True, 'oob_score': False, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 8, 'max_samples': 0.8, 'max_features': 0.75, 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.615624               13
+      {'warm_start': False, 'oob_score': True, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_samples': 0.9, 'max_features': 'sqrt', 'max_depth': 5, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.599812               14
+                                 {'warm_start': True, 'oob_score': False, 'n_estimators': 100, 'min_samples_split': 5, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': None, 'max_depth': 5, 'criterion': 'entropy', 'class_weight': None, 'bootstrap': False}         0.579059               15
+     {'warm_start': True, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_samples': 0.9, 'max_features': 'log2', 'max_depth': 5, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+    {'warm_start': False, 'oob_score': False, 'n_estimators': 100, 'min_samples_split': 30, 'min_samples_leaf': 2, 'max_samples': 0.9, 'max_features': None, 'max_depth': None, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+      {'warm_start': True, 'oob_score': True, 'n_estimators': 1000, 'min_samples_split': 2, 'min_samples_leaf': 10, 'max_samples': None, 'max_features': 0.75, 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+                                   {'warm_start': True, 'oob_score': True, 'n_estimators': 200, 'min_samples_split': 20, 'min_samples_leaf': 8, 'max_samples': 0.8, 'max_features': 0.5, 'max_depth': None, 'criterion': 'gini', 'class_weight': None, 'bootstrap': False}              NaN               16
+       {'warm_start': False, 'oob_score': True, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_samples': 0.9, 'max_features': 0.75, 'max_depth': 15, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+   {'warm_start': True, 'oob_score': False, 'n_estimators': 500, 'min_samples_split': 5, 'min_samples_leaf': 8, 'max_samples': 0.8, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+      {'warm_start': True, 'oob_score': True, 'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 10, 'max_samples': 0.8, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+{'warm_start': False, 'oob_score': False, 'n_estimators': 100, 'min_samples_split': 2, 'min_samples_leaf': 2, 'max_samples': 0.8, 'max_features': 'log2', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': False}              NaN               16
+                                  {'warm_start': False, 'oob_score': False, 'n_estimators': 200, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_samples': 0.9, 'max_features': 0.75, 'max_depth': 10, 'criterion': 'gini', 'class_weight': None, 'bootstrap': False}              NaN               16
+                                 {'warm_start': False, 'oob_score': True, 'n_estimators': 100, 'min_samples_split': 2, 'min_samples_leaf': 8, 'max_samples': None, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'gini', 'class_weight': None, 'bootstrap': False}              NaN               16
+
+Mejor puntuación: 0.6329288932849764
+
+Mejores parámetros encontrados:
+warm_start: True
+oob_score: False
+n_estimators: 1000
+min_samples_split: 2
+min_samples_leaf: 4
+max_samples: 0.9
+max_features: log2
+max_depth: 15
+criterion: entropy
+class_weight: None
+bootstrap: True
+
+Todos los parámetros del mejor modelo:
+bootstrap: True
+ccp_alpha: 0.0
+class_weight: None
+criterion: entropy
+max_depth: 15
+max_features: log2
+max_leaf_nodes: None
+max_samples: 0.9
+min_impurity_decrease: 0.0
+min_samples_leaf: 4
+min_samples_split: 2
+min_weight_fraction_leaf: 0.0
+n_estimators: 1000
+n_jobs: None
+oob_score: False
+random_state: 42
+verbose: 0
+warm_start: True
+
+Reporte de clasificación con el mejor modelo:
+              precision    recall  f1-score   support
+
+        Blue       0.71      0.53      0.61       217
+         Red       0.60      0.52      0.56       217
+        none       0.60      0.72      0.66       434
+
+    accuracy                           0.62       868
+   macro avg       0.64      0.59      0.61       868
+weighted avg       0.63      0.62      0.62       868

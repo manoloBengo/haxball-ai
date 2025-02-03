@@ -1,0 +1,75 @@
+
+Top 10 combinaciones de parámetros:
+                                                                                                                                                                                                                              params  mean_test_score  rank_test_score
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.618097                1
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.618097                1
+ {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.616624                3
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.607725                4
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.606736                5
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.605743                6
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.605743                6
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.599814                8
+{'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.594379                9
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.594379                9
+
+Todas las combinaciones de parámetros ordenadas por puntuación:
+                                                                                                                                                                                                                              params  mean_test_score  rank_test_score
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.618097                1
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.618097                1
+ {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.616624                3
+      {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.607725                4
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.606736                5
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.605743                6
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.605743                6
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.599814                8
+{'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.594379                9
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.594379                9
+   {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.593385               11
+     {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.592396               12
+     {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'log2', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.592396               12
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.587953               14
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1.5, 'Red': 1}, 'bootstrap': True}         0.587953               14
+
+Mejor puntuación: 0.6180972268014799
+
+Mejores parámetros encontrados:
+oob_score: False
+n_estimators: 500
+min_samples_split: 10
+min_samples_leaf: 4
+max_features: log2
+max_depth: 20
+criterion: gini
+class_weight: {'Blue': 1, 'none': 1.5, 'Red': 1}
+bootstrap: True
+
+Todos los parámetros del mejor modelo:
+bootstrap: True
+ccp_alpha: 0.0
+class_weight: {'Blue': 1, 'none': 1.5, 'Red': 1}
+criterion: gini
+max_depth: 20
+max_features: log2
+max_leaf_nodes: None
+max_samples: None
+min_impurity_decrease: 0.0
+min_samples_leaf: 4
+min_samples_split: 10
+min_weight_fraction_leaf: 0.0
+n_estimators: 500
+n_jobs: None
+oob_score: False
+random_state: 42
+verbose: 0
+warm_start: False
+
+Reporte de clasificación con el mejor modelo:
+              precision    recall  f1-score   support
+
+        Blue       0.73      0.43      0.54       217
+         Red       0.59      0.40      0.47       217
+        none       0.57      0.78      0.66       434
+
+    accuracy                           0.60       868
+   macro avg       0.63      0.54      0.56       868
+weighted avg       0.62      0.60      0.58       868
