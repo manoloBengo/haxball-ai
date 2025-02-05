@@ -1,6 +1,6 @@
 # Recopilación de Datos de Partidos de HaxBall, Análisis de Datos y Modelado
 
-Este proyecto incluye la recopilación de datos de partidos de HaxBall, su análisis y modelado. 
+Este proyecto incluye la recopilación de datos de partidos del juego online [HaxBall](https://www.haxball.com/play), su análisis exploratorio y modelado. 
 Los datos fueron generados en partidos que ocurrieron en mi servidor, donde usuarios desconocidos entraron a jugar partidos 3vs3, a 3 goles o 180 segundos (o tiempo extra en caso de empate).
 En los notebooks en la carpeta `/modelado` se proveen mas detalles de los datos y archivos **.csv** con los datos que se utilizaron, en las carpetas `/modelado/filtered_data` y `/modelado/raw_data`.
 
