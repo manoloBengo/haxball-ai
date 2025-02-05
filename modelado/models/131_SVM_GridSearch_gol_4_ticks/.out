@@ -1,0 +1,18 @@
+
+Métricas en Validación del mejor modelo:
+
+Accuracy: 0.6401384083044983
+Precision: 0.6466912903762858
+Recall: 0.6148239293463611
+F1-Score: 0.6275100229156557
+
+Classification Report:
+              precision    recall  f1-score   support
+
+        Blue       0.70      0.59      0.64       144
+         Red       0.61      0.54      0.57       145
+        none       0.63      0.72      0.67       289
+
+    accuracy                           0.64       578
+   macro avg       0.65      0.61      0.63       578
+weighted avg       0.64      0.64      0.64       578

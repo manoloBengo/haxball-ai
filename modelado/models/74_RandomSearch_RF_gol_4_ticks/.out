@@ -1,0 +1,60 @@
+
+Top 10 combinaciones de parámetros:
+                                                                                                                                                                                                                           params  mean_test_score  rank_test_score
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.602269                1
+{'oob_score': False, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.597821                2
+    {'oob_score': False, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.587443                3
+ {'oob_score': False, 'n_estimators': 100, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.586954                4
+    {'oob_score': False, 'n_estimators': 200, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 2, 'none': 1, 'Red': 2}, 'bootstrap': True}         0.559775                5
+
+Todas las combinaciones de parámetros ordenadas por puntuación:
+                                                                                                                                                                                                                           params  mean_test_score  rank_test_score
+  {'oob_score': False, 'n_estimators': 500, 'min_samples_split': 10, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.602269                1
+{'oob_score': False, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 4, 'max_features': 'sqrt', 'max_depth': None, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.597821                2
+    {'oob_score': False, 'n_estimators': 100, 'min_samples_split': 20, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 10, 'criterion': 'gini', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.587443                3
+ {'oob_score': False, 'n_estimators': 100, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'sqrt', 'max_depth': 20, 'criterion': 'entropy', 'class_weight': {'Blue': 1, 'none': 1, 'Red': 1}, 'bootstrap': True}         0.586954                4
+    {'oob_score': False, 'n_estimators': 200, 'min_samples_split': 10, 'min_samples_leaf': 10, 'max_features': 'log2', 'max_depth': 20, 'criterion': 'gini', 'class_weight': {'Blue': 2, 'none': 1, 'Red': 2}, 'bootstrap': True}         0.559775                5
+
+Mejor puntuación: 0.6022691138220317
+
+Mejores parámetros encontrados:
+oob_score: False
+n_estimators: 500
+min_samples_split: 10
+min_samples_leaf: 4
+max_features: sqrt
+max_depth: 20
+criterion: entropy
+class_weight: {'Blue': 1, 'none': 1, 'Red': 1}
+bootstrap: True
+
+Todos los parámetros del mejor modelo:
+bootstrap: True
+ccp_alpha: 0.0
+class_weight: {'Blue': 1, 'none': 1, 'Red': 1}
+criterion: entropy
+max_depth: 20
+max_features: sqrt
+max_leaf_nodes: None
+max_samples: None
+min_impurity_decrease: 0.0
+min_samples_leaf: 4
+min_samples_split: 10
+min_weight_fraction_leaf: 0.0
+n_estimators: 500
+n_jobs: None
+oob_score: False
+random_state: 906
+verbose: 0
+warm_start: False
+
+Reporte de clasificación con el mejor modelo:
+              precision    recall  f1-score   support
+
+        Blue       0.66      0.53      0.59       217
+         Red       0.60      0.55      0.58       217
+        none       0.60      0.68      0.64       434
+
+    accuracy                           0.61       868
+   macro avg       0.62      0.59      0.60       868
+weighted avg       0.61      0.61      0.61       868

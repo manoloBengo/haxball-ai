@@ -1,0 +1,20 @@
+
+Métricas en Validación:
+
+Accuracy: 0.6463133640552995
+Precision: 0.6499681406543683
+Recall: 0.6367127496159753
+F1-Score: 0.6426429330173427
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       0.67      0.61      0.64       217
+           1       0.64      0.63      0.63       217
+           2       0.64      0.68      0.66       434
+
+    accuracy                           0.65       868
+   macro avg       0.65      0.64      0.64       868
+weighted avg       0.65      0.65      0.65       868
+
+Costo Personalizado: 0.7361751152073732
