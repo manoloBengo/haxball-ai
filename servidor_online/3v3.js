@@ -20,12 +20,12 @@ room.onRoomLink = function() {
 const mapUrl = 'https://manoloBengo.github.io/haxmaps/x3_bazinga.hbs';
 let originalMapData = null;
 let isRevertingMap = false; // Bandera para evitar bucles infinitos de cambios de mapa
-let isMatchActive = false; // Bandera para saber si un partido est¨¢ activo
-let isBallBeingPlayed = false; // Bandera para saber si un partido est¨¢ activo
-let mapChanged = false; // Bandera para evitar m¨²ltiples cambios de mapa
+let isMatchActive = false; // Bandera para saber si un partido estÂ¨Â¢ activo
+let isBallBeingPlayed = false; // Bandera para saber si un partido estÂ¨Â¢ activo
+let mapChanged = false; // Bandera para evitar mÂ¨Â²ltiples cambios de mapa
 let afterGoal = false; // Bandera para saber si el saque de medio es despues de un gol
 
-// Funci¨®n para cargar el mapa desde una URL
+// FunciÂ¨Â®n para cargar el mapa desde una URL
 function loadMapFromUrl(url, callback) {
     fetch(url)
         .then(response => {
@@ -55,7 +55,7 @@ loadMapFromUrl(mapUrl, (mapData) => {
 
 // Comandos --------------------------
 
-const hostPlayerId = 0; // ID del host, que siempre est¨¢ y no debe ser manejado
+const hostPlayerId = 0; // ID del host, que siempre estÂ¨Â¢ y no debe ser manejado
 
 // Mensaje cuando un jugador entra
 room.onPlayerJoin = function (player) {
@@ -67,8 +67,8 @@ room.onPlayerJoin = function (player) {
         .then(response => response.json())
         .then(data => {
             if (data.player_id) {
-                console.log(`Jugador ${player.name} asignado con ID ¨²nico: ${data.player_id}`);
-                player.customPlayerId = data.player_id; // Guarda el ID ¨²nico para el jugador
+                console.log(`Jugador ${player.name} asignado con ID Â¨Â²nico: ${data.player_id}`);
+                player.customPlayerId = data.player_id; // Guarda el ID Â¨Â²nico para el jugador
             } else {
                 console.error(`No se pudo asignar un ID al jugador ${player.name}`);
             }
@@ -80,7 +80,7 @@ room.onPlayerJoin = function (player) {
 room.onPlayerLeave = function (player) {
     console.log(`${player.name} salio de la sala.`);
     
-    // Verificar si alg¨²n administrador sigue en la sala
+    // Verificar si algÂ¨Â²n administrador sigue en la sala
     const players = room.getPlayerList();
     const admins = players.filter(p => p.admin && p.id !== hostPlayerId);
     
@@ -103,13 +103,13 @@ room.onPlayerChat = function (player, message) {
         } else {
             room.sendAnnouncement(`El comando '!admin' ya no esta disponible, alguien ya tiene admin.`, player.id, 0xFF0000, "normal", 2);
         }
-        return false; // No mostrar el mensaje en el chat p¨²blico
+        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
     }
     
     // Bloquear intentos de cambiar el mapa
     if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
         room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
-        return false; // No mostrar el mensaje en el chat p¨²blico
+        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
     }
     
     return true; // Permite que el mensaje se muestre en el chat
@@ -142,10 +142,10 @@ room.onStadiumChange = function (newStadiumName, byPlayer) {
 
 // Variables
 var matchId = null; // ID del partido actual
-let scorer = null; // Variable para el jugador que anot¨® el ¨²ltimo gol
+let scorer = null; // Variable para el jugador que anotÂ¨Â® el Â¨Â²ltimo gol
 
 
-// Funci¨®n para obtener un nuevo match_id e inicializar el partido
+// FunciÂ¨Â®n para obtener un nuevo match_id e inicializar el partido
 function initializeMatchIdAndRegister() {
     fetch("http://localhost:3000/next-match-id")
         .then(response => {
@@ -162,7 +162,7 @@ function initializeMatchIdAndRegister() {
         .catch(error => console.error("Error inicializando el match_id:", error));
 }
 
-// Funci¨®n para registrar el inicio del partido
+// FunciÂ¨Â®n para registrar el inicio del partido
 function registerMatchStart() {
     const startTime = new Date().toISOString();
     fetch("http://localhost:3000/register-match", {
@@ -182,7 +182,7 @@ function registerMatchStart() {
         .catch(error => console.error("Error registrando el partido:", error));
 }
 
-// Funci¨®n para registrar el final del partido
+// FunciÂ¨Â®n para registrar el final del partido
 function endMatch() {
     const endTime = new Date().toISOString();
     fetch("http://localhost:3000/register-end-match", {
@@ -237,7 +237,7 @@ room.onGameStop = function () {
 var playerPositions = []; // Almacena posiciones temporalmente.
 var sendInterval = 60; // Cantidad de ticks por segundo (1 segundo = 60 ticks)
 var lastSendTick = 0;
-const tickInterval = 60; // Env¨ªa datos cada 60 ticks
+const tickInterval = 60; // EnvÂ¨Âªa datos cada 60 ticks
 let tickCounter = 0; // Contador de ticks
 let lastTouchPlayer = null;
 
@@ -285,7 +285,7 @@ room.onGameTick = function () {
 		isBallBeingPlayed = true;
 		
     if (!players || !ball) {
-        console.error("No se pudieron obtener jugadores o posici¨®n de la pelota.");
+        console.error("No se pudieron obtener jugadores o posiciÂ¨Â®n de la pelota.");
         return;
     }
 
@@ -313,7 +313,7 @@ room.onGameTick = function () {
             };
         }).filter(player => {
             if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
-                console.error(`Error: La posici¨®n del jugador ${player.player_id} es nula.`);
+                console.error(`Error: La posiciÂ¨Â®n del jugador ${player.player_id} es nula.`);
                 return false;
             }
             return true;
@@ -328,7 +328,7 @@ room.onGameTick = function () {
             previousPositions[0] = currentBall;
 
             if (currentBall.x == null || currentBall.y == null || velocity.velocity_x == null || velocity.velocity_y == null) {
-                console.error('Error: La posici¨®n de la pelota o velocidades son nulas.');
+                console.error('Error: La posiciÂ¨Â®n de la pelota o velocidades son nulas.');
                 return null;
             }
 
@@ -380,10 +380,10 @@ room.onGameTick = function () {
 };
 
 
-// Funci¨®n para enviar datos al servidor backend.
+// FunciÂ¨Â®n para enviar datos al servidor backend.
 function sendDataToBackend(data) {
     if (!matchId) {
-        console.error("No se puede enviar datos porque el match_id no est¨¢ definido.");
+        console.error("No se puede enviar datos porque el match_id no estÂ¨Â¢ definido.");
         return;
     }
 
@@ -394,7 +394,7 @@ function sendDataToBackend(data) {
     }).catch(err => console.error("Error enviando posiciones al backend:", err));
 }
 
-// Captura ¨²ltimo jugador en tocar la pelota
+// Captura Â¨Â²ltimo jugador en tocar la pelota
 room.onPlayerBallTouch = function (player) {
     lastTouchPlayer = player;
 };
@@ -427,7 +427,7 @@ room.onTeamGoal = function (team) {
 room.onTeamVictory = function (scores) {
     isBallBeingPlayed = false;
     setTimeout(() => {
-        // No cambiar autom¨¢ticamente a true
+        // No cambiar automÂ¨Â¢ticamente a true
     }, 5000); // Mantener isBallBeingPlayed en falso durante 5 segundos
 
     console.log(`Victoria del equipo: ${scores.red > scores.blue ? 'Red' : 'Blue'}`);
