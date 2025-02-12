@@ -1,4 +1,49 @@
-def partido_entero_pkl(
+"""Librerias generales"""
+import pandas as pd
+import numpy as np
+
+"""Librerias de visualizacion"""
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+"""Librerias para manejar o importar archivos y directorios"""
+import os
+import pickle
+import sys
+
+"""Librerias de sklearn"""
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+
+
+
+
+""" 
+---------------------------------- Funciones de visualizacion ----------------------------------
+"""
+
+
+
+def matriz_de_confusion(
+    directorio_modelo,
+    conf_matrix):
+    print("Matriz de Confusión:")
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(conf_matrix, annot=True, cmap='viridis', fmt='d', cbar=False,
+                xticklabels=['Gol Blue', 'Gol Red', 'Ningún gol'],
+                yticklabels=['Gol Blue', 'Gol Red', 'Ningún gol'])
+    plt.xlabel('Predicción')
+    plt.ylabel('Verdadero')
+    plt.title('Matriz de Confusión')
+
+    ruta=os.path.join(directorio_modelo, "matriz_de_confusion.png")
+    plt.savefig(ruta)
+
+
+def lineplot_partido_entero_pkl(
     random_state,
     background_image,
     data_posiciones_grouped_filtered_labeled,
@@ -10,13 +55,69 @@ def partido_entero_pkl(
     best_model
     ):
     
-    import pickle
-    import pandas as pd
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import os
+    
+    # Seleccionar un partido específico
+    match_id_sample = custom_match_id  # Cambia esto al ID del partido que deseas graficar
+    partido_data = data_posiciones_filtered_original[data_posiciones_filtered_original['match_id'] == match_id_sample]
+
+    # Crear un DataFrame con los momentos del partido
+    momentos_partido = partido_data[['match_time']].drop_duplicates().sort_values(by='match_time')
+
+    # Preparar los datos para la predicción
+    X_partido = []
+    indices_partido = []
+
+    for match_time in momentos_partido['match_time']:
+        subset = partido_data[partido_data['match_time'] == match_time]
+        if len(subset) == 7:  # Asegurarse de tener las 7 filas
+            input_data = subset[['x', 'y', 'velocity_x', 'velocity_y', 'team']].values.flatten()
+            X_partido.append(input_data)
+            indices_partido.append(match_time)
+
+    X_partido = np.array(X_partido)
+
+    # Predecir las probabilidades para cada momento del partido
+    probabilidades_partido = best_model.predict_proba(X_partido)
+
+    # Convertir las probabilidades a un DataFrame
+    probabilidades_partido_df = pd.DataFrame(probabilidades_partido, columns=['%Blue', '%Red', '%None'])
+    probabilidades_partido_df['match_time'] = indices_partido
+
+    # Graficar las predicciones a lo largo del tiempo
+    plt.figure(figsize=(12, 6))
+
+    # Graficar las probabilidades de cada clase
+    plt.plot(probabilidades_partido_df['match_time'], probabilidades_partido_df['%Blue'], label='%Blue', color='blue')
+    plt.plot(probabilidades_partido_df['match_time'], probabilidades_partido_df['%Red'], label='%Red', color='red')
+    plt.plot(probabilidades_partido_df['match_time'], probabilidades_partido_df['%None'], label='%None', color='gray')
+
+    # Añadir etiquetas y título
+    plt.xlabel('Tiempo del Partido')
+    plt.ylabel('Probabilidad')
+    plt.title(f'Predicciones del Modelo para el Partido {match_id_sample}')
+    plt.legend(loc='upper right')
+    plt.grid()
+
+    # Guardar el gráfico
+    ruta = os.path.join(directorio_modelo, f"lineplot_predicciones_partido_{match_id_sample}.png")
+    plt.savefig(ruta)
+
+    # Mostrar el gráfico
 
 
+def partido_entero_pkl(
+    random_state,
+    background_image,
+    data_posiciones_grouped_filtered_labeled,
+    data_posiciones_filtered,
+    data_posiciones_filtered_original,
+    directorio_modelo,  # directorio donde está el modelo
+    gol_n_ticks,
+    custom_match_id,  # id del partido a analizar en la sección de análisis puntual de todos los momentos de un partido
+    best_model,
+    tipo_de_modelo
+    ):
+    
     print(best_model)
     
     # Creación de la clave combinada
@@ -58,12 +159,16 @@ def partido_entero_pkl(
     
     
     # Obtener el scaler del modelo cargado
-    scaler_path = os.path.join(directorio_modelo, "scaler.pkl")
-    with open(scaler_path, 'rb') as f:
-        scaler_cargado = pickle.load(f)
-    
-    # Escalar los datos de test con el scaler cargado
-    X_partido_custom_scaled = scaler_cargado.transform(X)
+    if tipo_de_modelo == 'SVC':
+        scaler_path = os.path.join(directorio_modelo, "scaler.pkl")
+        with open(scaler_path, 'rb') as f:
+            scaler_cargado = pickle.load(f)
+
+        # Escalar los datos de test con el scaler cargado
+        X_partido_custom_scaled = scaler_cargado.transform(X)
+        
+    else:
+        X_partido_custom_scaled = np.array(X)
     
     #print('X_partido_custom_scaled:\n', X_partido_custom_scaled)
     print(type(X))
