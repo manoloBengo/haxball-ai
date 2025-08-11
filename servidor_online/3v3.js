@@ -295,106 +295,107 @@ room.onGameTick = function () {
         console.warn("No hay un match_id activo. Ignorando datos.");
         return;
     }
-    
-    //Para saber si el partido esta activo
-    //console.log(`Pelota en juego: ${isBallBeingPlayed}`);
 
     const players = room.getPlayerList();
     const ball = room.getBallPosition();
     const scores = room.getScores();
     const currentTime = scores ? scores.time : 0;
-    const prev_time = -1;
-    
-    if(ball.x === 0 && ball.y === 0){
-				afterGoal = false;
-		}
-		
-		if(afterGoal){
-		    if(!isBallBeingPlayed){
-				    return;
-		    }
-    }
-    
-    if(ball.x === 0 && ball.y === 0 && !isBallBeingPlayed){
-		    return;
+
+    if (ball.x === 0 && ball.y === 0) {
+        afterGoal = false;
     }
 
-		
-		isBallBeingPlayed = true;
-		
+    if (afterGoal) {
+        if (!isBallBeingPlayed) {
+            return;
+        }
+    }
+
+    if (ball.x === 0 && ball.y === 0 && !isBallBeingPlayed) {
+        return;
+    }
+
+    isBallBeingPlayed = true;
+
     if (!players || !ball) {
-        console.error("No se pudieron obtener jugadores o posici¨®n de la pelota.");
+        console.error("No se pudieron obtener jugadores o posicion de la pelota.");
         return;
     }
 
     tickCounter++;
 
+    // Calculo de velocidades en cada tick
+    const validPlayers = players.filter(p => p.position).map(player => {
+        const currentPos = { x: player.position.x, y: player.position.y, time: currentTime };
+        const prev = previousPositions[player.id] || currentPos;
+        const deltaTime = prev.time !== undefined ? currentTime - prev.time : 1;
+
+        const velocity = calculateVelocity(currentPos, prev, deltaTime);
+        previousPositions[player.id] = currentPos;  // Guardamos la posicion actual para el proximo tick
+
+        return {
+            player_id: player.id,
+            player_name: player.name,
+            x: currentPos.x,
+            y: currentPos.y,
+            velocity_x: velocity.velocity_x,
+            velocity_y: velocity.velocity_y,
+            team: player.team
+        };
+    });
+
+    const ballData = (() => {
+        const currentBall = { x: ball.x, y: ball.y, time: currentTime };
+        const prevBall = previousPositions[0] || currentBall;
+        const deltaTime = prevBall.time !== undefined ? currentTime - prevBall.time : 1;
+
+        const velocity = calculateVelocity(currentBall, prevBall, deltaTime);
+        previousPositions[0] = currentBall;  // Guardamos la posicion de la pelota
+
+        return {
+            player_id: 0,
+            player_name: "Ball",
+            x: currentBall.x,
+            y: currentBall.y,
+            velocity_x: velocity.velocity_x,
+            velocity_y: velocity.velocity_y
+        };
+    })();
+
+    const filteredPlayers = validPlayers.filter(player => {
+        if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
+            console.error(`Error: La posicion del jugador ${player.player_id} es nula.`);
+            return false;
+        }
+        return true;
+    });
+
+    if (!ballData || ballData.x == null || ballData.y == null || ballData.velocity_x == null || ballData.velocity_y == null) {
+        console.error('Error: La posicion de la pelota o velocidades son nulas.');
+        return;
+    }
+
+    const data = {
+        time: currentTime,
+        players: filteredPlayers,
+        ball: ballData
+    };
+
+    playerPositions.push(data);
+
+    // Solo se envian los datos si se supera el intervalo
     if (tickCounter >= tickInterval) {
         tickCounter = 0;
 
-        const validPlayers = players.filter(p => p.position).map(player => {
-            const currentPos = { x: player.position.x, y: player.position.y, time: currentTime };
-            const prev = previousPositions[player.id] || currentPos;
-            const deltaTime = prev.time !== undefined ? currentTime - prev.time : 1;
 
-            const velocity = calculateVelocity(currentPos, prev, deltaTime);
-            previousPositions[player.id] = currentPos;
-
-            return {
-                player_id: player.id,
-                player_name: player.name,
-                x: currentPos.x,
-                y: currentPos.y,
-                velocity_x: velocity.velocity_x,
-                velocity_y: velocity.velocity_y,
-                team: player.team
-            };
-        }).filter(player => {
-            if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
-                console.error(`Error: La posici¨®n del jugador ${player.player_id} es nula.`);
-                return false;
-            }
-            return true;
-        });
-
-        const ballData = (() => {
-            const currentBall = { x: ball.x, y: ball.y, time: currentTime };
-            const prevBall = previousPositions[0] || currentBall;
-            const deltaTime = prevBall.time !== undefined ? currentTime - prevBall.time : 1;
-
-            const velocity = calculateVelocity(currentBall, prevBall, deltaTime);
-            previousPositions[0] = currentBall;
-
-            if (currentBall.x == null || currentBall.y == null || velocity.velocity_x == null || velocity.velocity_y == null) {
-                console.error('Error: La posici¨®n de la pelota o velocidades son nulas.');
-                return null;
-            }
-
-            return {
-                player_id: 0,
-                player_name: "Ball",
-                x: currentBall.x,
-                y: currentBall.y,
-                velocity_x: velocity.velocity_x,
-                velocity_y: velocity.velocity_y
-            };
-        })();
-
-        if (!ballData) {
-            return;
-        }
-
-        const data = {
-            time: currentTime,
-            players: validPlayers,
-            ball: ballData
-        };
-
-        playerPositions.push(data);
         sendDataToBackend(playerPositions);
-        playerPositions = [];
     }
 
+    playerPositions = [];
+
+    
+
+    // Detectar jugador mas cercano a la pelota
     let closestPlayer = null;
     let closestDistance = Infinity;
 
