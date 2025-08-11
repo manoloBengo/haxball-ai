@@ -1,6 +1,6 @@
 // Inicio del servidor --------------
 var room = HBInit({
-    roomName: "3v3 a los pases",
+    roomName: "3v3 picante con tnt",
     maxPlayers: 10,
     public: true,
     noPlayer: true
@@ -20,12 +20,12 @@ room.onRoomLink = function() {
 const mapUrl = 'https://manoloBengo.github.io/haxmaps/x3_bazinga.hbs';
 let originalMapData = null;
 let isRevertingMap = false; // Bandera para evitar bucles infinitos de cambios de mapa
-let isMatchActive = false; // Bandera para saber si un partido estÂ¨Â¢ activo
-let isBallBeingPlayed = false; // Bandera para saber si un partido estÂ¨Â¢ activo
-let mapChanged = false; // Bandera para evitar mÂ¨Â²ltiples cambios de mapa
+let isMatchActive = false; // Bandera para saber si un partido est¨¢ activo
+let isBallBeingPlayed = false; // Bandera para saber si un partido est¨¢ activo
+let mapChanged = false; // Bandera para evitar m¨²ltiples cambios de mapa
 let afterGoal = false; // Bandera para saber si el saque de medio es despues de un gol
 
-// FunciÂ¨Â®n para cargar el mapa desde una URL
+// Funci¨®n para cargar el mapa desde una URL
 function loadMapFromUrl(url, callback) {
     fetch(url)
         .then(response => {
@@ -55,10 +55,36 @@ loadMapFromUrl(mapUrl, (mapData) => {
 
 // Comandos --------------------------
 
-const hostPlayerId = 0; // ID del host, que siempre estÂ¨Â¢ y no debe ser manejado
+const hostPlayerId = 0; // ID del host, que siempre est¨¢ y no debe ser manejado
+
+
+
+
+// Funcion para registrar chats
+function logChatEvent(jugador, mensaje, tipo) {
+    const evento = {
+        hora: new Date().toISOString(),  // Formato ISO (ej: 2025-07-23T19:00:00.000Z)
+        jugador: jugador || "SYSTEM",
+        mensaje: mensaje,
+		tipo: tipo
+    };
+	
+	console.log(`${jugador} dice: ${mensaje}`)
+	
+    // Enviarlo al backend
+    fetch("http://localhost:3000/guardar-chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(evento)
+    }).catch(err => console.error("Error enviando evento de chat:", err));
+}
+
+
+
 
 // Mensaje cuando un jugador entra
 room.onPlayerJoin = function (player) {
+	logChatEvent("SYSTEM", `Jugador ${player.name} entro`, "join");
     fetch("http://localhost:3000/get-or-create-unique-player", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,8 +93,8 @@ room.onPlayerJoin = function (player) {
         .then(response => response.json())
         .then(data => {
             if (data.player_id) {
-                console.log(`Jugador ${player.name} asignado con ID Â¨Â²nico: ${data.player_id}`);
-                player.customPlayerId = data.player_id; // Guarda el ID Â¨Â²nico para el jugador
+                console.log(`Jugador ${player.name} asignado con ID ¨²nico: ${data.player_id}`);
+                player.customPlayerId = data.player_id; // Guarda el ID ¨²nico para el jugador
             } else {
                 console.error(`No se pudo asignar un ID al jugador ${player.name}`);
             }
@@ -78,9 +104,10 @@ room.onPlayerJoin = function (player) {
 
 // Mensaje cuando un jugador sale
 room.onPlayerLeave = function (player) {
+	logChatEvent("SYSTEM", `Jugador ${player.name} salio`, "leave");
     console.log(`${player.name} salio de la sala.`);
-    
-    // Verificar si algÂ¨Â²n administrador sigue en la sala
+
+    // Verificar si alg¨²n administrador sigue en la sala
     const players = room.getPlayerList();
     const admins = players.filter(p => p.admin && p.id !== hostPlayerId);
     
@@ -89,7 +116,13 @@ room.onPlayerLeave = function (player) {
     }
 };
 
-// Capturar mensajes de chat
+// Registrar cuando un jugador es kickeado o baneado
+room.onPlayerKicked = (player, reason, ban) => {
+    let tipo = ban ? "ban" : "kick";
+    logChatEvent("SYSTEM", `Jugador ${player.name} fue ${tipo}. Motivo: ${reason}`, tipo);
+};
+
+// Capturar mensajes de chat para saber si se requiere ser admin
 room.onPlayerChat = function (player, message) {
     // Comando para obtener admin
     if (message === "!admin") {
@@ -103,13 +136,18 @@ room.onPlayerChat = function (player, message) {
         } else {
             room.sendAnnouncement(`El comando '!admin' ya no esta disponible, alguien ya tiene admin.`, player.id, 0xFF0000, "normal", 2);
         }
-        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
+        return false; // No mostrar el mensaje en el chat p¨²blico
+    }
+	
+	// Llamado a funcion para registrar chats
+	if (player && player.name) {
+        logChatEvent(player.name, message, "mensaje");
     }
     
     // Bloquear intentos de cambiar el mapa
     if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
         room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
-        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
+        return false; // No mostrar el mensaje en el chat p¨²blico
     }
     
     return true; // Permite que el mensaje se muestre en el chat
@@ -142,10 +180,10 @@ room.onStadiumChange = function (newStadiumName, byPlayer) {
 
 // Variables
 var matchId = null; // ID del partido actual
-let scorer = null; // Variable para el jugador que anotÂ¨Â® el Â¨Â²ltimo gol
+let scorer = null; // Variable para el jugador que anot¨® el ¨²ltimo gol
 
 
-// FunciÂ¨Â®n para obtener un nuevo match_id e inicializar el partido
+// Funci¨®n para obtener un nuevo match_id e inicializar el partido
 function initializeMatchIdAndRegister() {
     fetch("http://localhost:3000/next-match-id")
         .then(response => {
@@ -162,7 +200,7 @@ function initializeMatchIdAndRegister() {
         .catch(error => console.error("Error inicializando el match_id:", error));
 }
 
-// FunciÂ¨Â®n para registrar el inicio del partido
+// Funci¨®n para registrar el inicio del partido
 function registerMatchStart() {
     const startTime = new Date().toISOString();
     fetch("http://localhost:3000/register-match", {
@@ -182,7 +220,7 @@ function registerMatchStart() {
         .catch(error => console.error("Error registrando el partido:", error));
 }
 
-// FunciÂ¨Â®n para registrar el final del partido
+// Funci¨®n para registrar el final del partido
 function endMatch() {
     const endTime = new Date().toISOString();
     fetch("http://localhost:3000/register-end-match", {
@@ -237,7 +275,7 @@ room.onGameStop = function () {
 var playerPositions = []; // Almacena posiciones temporalmente.
 var sendInterval = 60; // Cantidad de ticks por segundo (1 segundo = 60 ticks)
 var lastSendTick = 0;
-const tickInterval = 60; // EnvÂ¨Âªa datos cada 60 ticks
+const tickInterval = 60; // Env¨ªa datos cada 60 ticks
 let tickCounter = 0; // Contador de ticks
 let lastTouchPlayer = null;
 
@@ -285,7 +323,7 @@ room.onGameTick = function () {
 		isBallBeingPlayed = true;
 		
     if (!players || !ball) {
-        console.error("No se pudieron obtener jugadores o posiciÂ¨Â®n de la pelota.");
+        console.error("No se pudieron obtener jugadores o posici¨®n de la pelota.");
         return;
     }
 
@@ -313,7 +351,7 @@ room.onGameTick = function () {
             };
         }).filter(player => {
             if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
-                console.error(`Error: La posiciÂ¨Â®n del jugador ${player.player_id} es nula.`);
+                console.error(`Error: La posici¨®n del jugador ${player.player_id} es nula.`);
                 return false;
             }
             return true;
@@ -328,7 +366,7 @@ room.onGameTick = function () {
             previousPositions[0] = currentBall;
 
             if (currentBall.x == null || currentBall.y == null || velocity.velocity_x == null || velocity.velocity_y == null) {
-                console.error('Error: La posiciÂ¨Â®n de la pelota o velocidades son nulas.');
+                console.error('Error: La posici¨®n de la pelota o velocidades son nulas.');
                 return null;
             }
 
@@ -380,21 +418,21 @@ room.onGameTick = function () {
 };
 
 
-// FunciÂ¨Â®n para enviar datos al servidor backend.
+// Funci¨®n para enviar datos al servidor backend.
 function sendDataToBackend(data) {
     if (!matchId) {
-        console.error("No se puede enviar datos porque el match_id no estÂ¨Â¢ definido.");
+        console.error("No se puede enviar datos porque el match_id no est¨¢ definido.");
         return;
     }
 
     fetch("http://localhost:3000/save-positions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match_id: matchId, positions: data }),
+        body: JSON.stringify({ match_id: matchId, positions: data , hora: new Date().toISOString()}),
     }).catch(err => console.error("Error enviando posiciones al backend:", err));
 }
 
-// Captura Â¨Â²ltimo jugador en tocar la pelota
+// Captura ¨²ltimo jugador en tocar la pelota
 room.onPlayerBallTouch = function (player) {
     lastTouchPlayer = player;
 };
@@ -406,6 +444,7 @@ room.onTeamGoal = function (team) {
     afterGoal = true;
     const scores = room.getScores();
     const goalTick = scores ? scores.time : 0;  // Obtener el tick del gol
+	const hora_gol = new Date().toISOString();
 
     if (lastTouchPlayer) {
         console.log(`GOOOOL de ${lastTouchPlayer.name}, equipo ${scoringTeam} en el tick ${goalTick}`);
@@ -417,7 +456,8 @@ room.onTeamGoal = function (team) {
                 player_id: lastTouchPlayer.id,
                 player_name: lastTouchPlayer.name,
                 equipo: scoringTeam,
-                tick: goalTick  // Enviar el tick del gol
+                tick: goalTick,  // Enviar el tick del gol
+				hora: hora_gol
             }),
         }).catch(err => console.error("Error enviando gol:", err));
     }
@@ -427,7 +467,7 @@ room.onTeamGoal = function (team) {
 room.onTeamVictory = function (scores) {
     isBallBeingPlayed = false;
     setTimeout(() => {
-        // No cambiar automÂ¨Â¢ticamente a true
+        // No cambiar autom¨¢ticamente a true
     }, 5000); // Mantener isBallBeingPlayed en falso durante 5 segundos
 
     console.log(`Victoria del equipo: ${scores.red > scores.blue ? 'Red' : 'Blue'}`);
