@@ -145,10 +145,10 @@ room.onPlayerChat = function (player, message) {
     }
     
     // Bloquear intentos de cambiar el mapa
-    if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
-        room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
-        return false; // No mostrar el mensaje en el chat p¨²blico
-    }
+    //if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
+    //    room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
+    //    return false; // No mostrar el mensaje en el chat p¨²blico
+    //}
     
     return true; // Permite que el mensaje se muestre en el chat
 };
@@ -157,22 +157,22 @@ room.onPlayerChat = function (player, message) {
 room.onStadiumChange = function (newStadiumName, byPlayer) {
     if (isMatchActive || isRevertingMap) return; // Evitar cambios durante el partido y bucles infinitos
 
-    if (byPlayer && byPlayer.id !== hostPlayerId) {
-        // Revertir al mapa original si el cambio no lo hizo el host
-        if (!mapChanged) {
-            isRevertingMap = true;
-            setTimeout(() => {
-                room.setCustomStadium(originalMapData);
-                isRevertingMap = false;
-                mapChanged = true;
-                room.sendAnnouncement(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`, null, 0xFF0000, "normal", 2);
-            }, 100); // A?adir un peque?o retraso para asegurar que el cambio se procese correctamente
-            console.log(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`);
-        }
-    } else {
-        mapChanged = false; // Resetear la bandera si el cambio lo hizo el host
-        console.log(`Cambio de mapa realizado por el host: ${byPlayer ? byPlayer.name : 'sistema'}`);
-    }
+    //if (byPlayer && byPlayer.id !== hostPlayerId) {
+    // Revertir al mapa original si el cambio no lo hizo el host
+    //    if (!mapChanged) {
+    //        isRevertingMap = true;
+    //        setTimeout(() => {
+    //            room.setCustomStadium(originalMapData);
+    //            isRevertingMap = false;
+    //            mapChanged = true;
+    //            room.sendAnnouncement(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`, null, 0xFF0000, "normal", 2);
+    //        }, 100); // A?adir un peque?o retraso para asegurar que el cambio se procese correctamente
+    //        console.log(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`);
+    //    }
+    //} else {
+    //    mapChanged = false; // Resetear la bandera si el cambio lo hizo el host
+    //    console.log(`Cambio de mapa realizado por el host: ${byPlayer ? byPlayer.name : 'sistema'}`);
+    //}
 };
 
 
