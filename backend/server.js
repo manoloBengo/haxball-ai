@@ -65,7 +65,7 @@ app.post("/register-end-match", async (req, res) => {
 
 // Endpoint para guardar las posiciones de los jugadores y el balón
 app.post("/save-positions", async (req, res) => {
-    const { match_id, positions } = req.body;
+    const { match_id, positions, hora } = req.body;
 
     // Mostrar el contenido de 'positions' y 'players' en la consola del servidor
     console.log("Positions received:", positions);
@@ -75,8 +75,8 @@ app.post("/save-positions", async (req, res) => {
 
     const query = `
         INSERT INTO posiciones
-        (match_id, player_id, x, y, velocity_x, velocity_y, time, team) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (match_id, player_id, x, y, velocity_x, velocity_y, time, team, hora) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `;
 
     try {
@@ -99,7 +99,8 @@ app.post("/save-positions", async (req, res) => {
                         player.velocity_x ?? 0,
                         player.velocity_y ?? 0,
                         position.time,
-                        player.team
+                        player.team,
+						hora
                     ];
 
                     await client.query(query, value);
@@ -117,7 +118,8 @@ app.post("/save-positions", async (req, res) => {
                 position.ball.velocity_x ?? 0,
                 position.ball.velocity_y ?? 0,
                 position.time,
-                0
+                0,
+				hora
             ];
 
             await client.query(query, ballValue);
@@ -134,7 +136,7 @@ app.post("/save-positions", async (req, res) => {
 
 // Endpoint para guardar goles
 app.post("/save-goal", async (req, res) => {
-    const { match_id, player_name, equipo, tick } = req.body;  // Obtener el tick del gol
+    const { match_id, player_name, equipo, tick, hora } = req.body;  // Obtener el tick del gol
 
     try {
         // Obtener el ID del jugador desde la base de datos
@@ -147,9 +149,9 @@ app.post("/save-goal", async (req, res) => {
             const playerId = playerResult.rows[0].player_id;
 
             await client.query(`
-                INSERT INTO goles (match_id, player_id, player_name, equipo, tick)
-                VALUES ($1, $2, $3, $4, $5)
-            `, [match_id, playerId, player_name, equipo, tick]);  // Insertar el tick del gol
+                INSERT INTO goles (match_id, player_id, player_name, equipo, tick, hora)
+                VALUES ($1, $2, $3, $4, $5, $6)
+            `, [match_id, playerId, player_name, equipo, tick, hora]);  // Insertar el tick del gol
 
             res.send("Gol registrado correctamente.");
         } else {
@@ -247,6 +249,25 @@ app.post("/get-or-create-player", async (req, res) => {
 
 
 
+app.post("/guardar-chats", async (req, res) => {
+    const { hora, jugador, mensaje, tipo } = req.body;
+	
+	 if (!hora || !jugador || !mensaje || !tipo) {
+        return res.status(400).send("Faltan datos (hora, jugador o mensaje).");
+    }
+
+	
+    try {
+        await client.query(
+            `INSERT INTO chats (hora, jugador, contenido, tipo_evento) VALUES ($1, $2, $3, $4)`,
+            [hora, jugador, mensaje, tipo]
+        );
+        res.status(200).send("Chat guardado");
+    } catch (err) {
+        console.error("Error guardando chat:", err);
+        res.status(500).send("Error guardando chat");
+    }
+});
 
 // Iniciar servidor
 app.listen(3000, () => {

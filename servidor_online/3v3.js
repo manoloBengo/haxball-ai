@@ -1,6 +1,6 @@
 // Inicio del servidor --------------
 var room = HBInit({
-    roomName: "3v3 a los pases",
+    roomName: "3v3 picante con tnt",
     maxPlayers: 10,
     public: true,
     noPlayer: true
@@ -20,12 +20,12 @@ room.onRoomLink = function() {
 const mapUrl = 'https://manoloBengo.github.io/haxmaps/x3_bazinga.hbs';
 let originalMapData = null;
 let isRevertingMap = false; // Bandera para evitar bucles infinitos de cambios de mapa
-let isMatchActive = false; // Bandera para saber si un partido estÂ¨Â¢ activo
-let isBallBeingPlayed = false; // Bandera para saber si un partido estÂ¨Â¢ activo
-let mapChanged = false; // Bandera para evitar mÂ¨Â²ltiples cambios de mapa
+let isMatchActive = false; // Bandera para saber si un partido est¨¢ activo
+let isBallBeingPlayed = false; // Bandera para saber si un partido est¨¢ activo
+let mapChanged = false; // Bandera para evitar m¨²ltiples cambios de mapa
 let afterGoal = false; // Bandera para saber si el saque de medio es despues de un gol
 
-// FunciÂ¨Â®n para cargar el mapa desde una URL
+// Funci¨®n para cargar el mapa desde una URL
 function loadMapFromUrl(url, callback) {
     fetch(url)
         .then(response => {
@@ -55,10 +55,36 @@ loadMapFromUrl(mapUrl, (mapData) => {
 
 // Comandos --------------------------
 
-const hostPlayerId = 0; // ID del host, que siempre estÂ¨Â¢ y no debe ser manejado
+const hostPlayerId = 0; // ID del host, que siempre est¨¢ y no debe ser manejado
+
+
+
+
+// Funcion para registrar chats
+function logChatEvent(jugador, mensaje, tipo) {
+    const evento = {
+        hora: new Date().toISOString(),  // Formato ISO (ej: 2025-07-23T19:00:00.000Z)
+        jugador: jugador || "SYSTEM",
+        mensaje: mensaje,
+		tipo: tipo
+    };
+	
+	console.log(`${jugador} dice: ${mensaje}`)
+	
+    // Enviarlo al backend
+    fetch("http://localhost:3000/guardar-chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(evento)
+    }).catch(err => console.error("Error enviando evento de chat:", err));
+}
+
+
+
 
 // Mensaje cuando un jugador entra
 room.onPlayerJoin = function (player) {
+	logChatEvent("SYSTEM", `Jugador ${player.name} entro`, "join");
     fetch("http://localhost:3000/get-or-create-unique-player", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,8 +93,8 @@ room.onPlayerJoin = function (player) {
         .then(response => response.json())
         .then(data => {
             if (data.player_id) {
-                console.log(`Jugador ${player.name} asignado con ID Â¨Â²nico: ${data.player_id}`);
-                player.customPlayerId = data.player_id; // Guarda el ID Â¨Â²nico para el jugador
+                console.log(`Jugador ${player.name} asignado con ID ¨²nico: ${data.player_id}`);
+                player.customPlayerId = data.player_id; // Guarda el ID ¨²nico para el jugador
             } else {
                 console.error(`No se pudo asignar un ID al jugador ${player.name}`);
             }
@@ -78,9 +104,10 @@ room.onPlayerJoin = function (player) {
 
 // Mensaje cuando un jugador sale
 room.onPlayerLeave = function (player) {
+	logChatEvent("SYSTEM", `Jugador ${player.name} salio`, "leave");
     console.log(`${player.name} salio de la sala.`);
-    
-    // Verificar si algÂ¨Â²n administrador sigue en la sala
+
+    // Verificar si alg¨²n administrador sigue en la sala
     const players = room.getPlayerList();
     const admins = players.filter(p => p.admin && p.id !== hostPlayerId);
     
@@ -89,7 +116,13 @@ room.onPlayerLeave = function (player) {
     }
 };
 
-// Capturar mensajes de chat
+// Registrar cuando un jugador es kickeado o baneado
+room.onPlayerKicked = (player, reason, ban) => {
+    let tipo = ban ? "ban" : "kick";
+    logChatEvent("SYSTEM", `Jugador ${player.name} fue ${tipo}. Motivo: ${reason}`, tipo);
+};
+
+// Capturar mensajes de chat para saber si se requiere ser admin
 room.onPlayerChat = function (player, message) {
     // Comando para obtener admin
     if (message === "!admin") {
@@ -103,14 +136,19 @@ room.onPlayerChat = function (player, message) {
         } else {
             room.sendAnnouncement(`El comando '!admin' ya no esta disponible, alguien ya tiene admin.`, player.id, 0xFF0000, "normal", 2);
         }
-        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
+        return false; // No mostrar el mensaje en el chat p¨²blico
+    }
+	
+	// Llamado a funcion para registrar chats
+	if (player && player.name) {
+        logChatEvent(player.name, message, "mensaje");
     }
     
     // Bloquear intentos de cambiar el mapa
-    if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
-        room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
-        return false; // No mostrar el mensaje en el chat pÂ¨Â²blico
-    }
+    //if ((message.startsWith("!map ") || message.startsWith("/map ")) && player.id !== hostPlayerId) {
+    //    room.sendAnnouncement(`No tienes permiso para cambiar el mapa.`, player.id, 0xFF0000, "normal", 2);
+    //    return false; // No mostrar el mensaje en el chat p¨²blico
+    //}
     
     return true; // Permite que el mensaje se muestre en el chat
 };
@@ -119,22 +157,22 @@ room.onPlayerChat = function (player, message) {
 room.onStadiumChange = function (newStadiumName, byPlayer) {
     if (isMatchActive || isRevertingMap) return; // Evitar cambios durante el partido y bucles infinitos
 
-    if (byPlayer && byPlayer.id !== hostPlayerId) {
-        // Revertir al mapa original si el cambio no lo hizo el host
-        if (!mapChanged) {
-            isRevertingMap = true;
-            setTimeout(() => {
-                room.setCustomStadium(originalMapData);
-                isRevertingMap = false;
-                mapChanged = true;
-                room.sendAnnouncement(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`, null, 0xFF0000, "normal", 2);
-            }, 100); // A?adir un peque?o retraso para asegurar que el cambio se procese correctamente
-            console.log(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`);
-        }
-    } else {
-        mapChanged = false; // Resetear la bandera si el cambio lo hizo el host
-        console.log(`Cambio de mapa realizado por el host: ${byPlayer ? byPlayer.name : 'sistema'}`);
-    }
+    //if (byPlayer && byPlayer.id !== hostPlayerId) {
+    // Revertir al mapa original si el cambio no lo hizo el host
+    //    if (!mapChanged) {
+    //        isRevertingMap = true;
+    //        setTimeout(() => {
+    //            room.setCustomStadium(originalMapData);
+    //            isRevertingMap = false;
+    //            mapChanged = true;
+    //            room.sendAnnouncement(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`, null, 0xFF0000, "normal", 2);
+    //        }, 100); // A?adir un peque?o retraso para asegurar que el cambio se procese correctamente
+    //        console.log(`Intento de cambio de mapa por ${byPlayer.name} bloqueado.`);
+    //    }
+    //} else {
+    //    mapChanged = false; // Resetear la bandera si el cambio lo hizo el host
+    //    console.log(`Cambio de mapa realizado por el host: ${byPlayer ? byPlayer.name : 'sistema'}`);
+    //}
 };
 
 
@@ -142,10 +180,10 @@ room.onStadiumChange = function (newStadiumName, byPlayer) {
 
 // Variables
 var matchId = null; // ID del partido actual
-let scorer = null; // Variable para el jugador que anotÂ¨Â® el Â¨Â²ltimo gol
+let scorer = null; // Variable para el jugador que anot¨® el ¨²ltimo gol
 
 
-// FunciÂ¨Â®n para obtener un nuevo match_id e inicializar el partido
+// Funci¨®n para obtener un nuevo match_id e inicializar el partido
 function initializeMatchIdAndRegister() {
     fetch("http://localhost:3000/next-match-id")
         .then(response => {
@@ -162,7 +200,7 @@ function initializeMatchIdAndRegister() {
         .catch(error => console.error("Error inicializando el match_id:", error));
 }
 
-// FunciÂ¨Â®n para registrar el inicio del partido
+// Funci¨®n para registrar el inicio del partido
 function registerMatchStart() {
     const startTime = new Date().toISOString();
     fetch("http://localhost:3000/register-match", {
@@ -182,7 +220,7 @@ function registerMatchStart() {
         .catch(error => console.error("Error registrando el partido:", error));
 }
 
-// FunciÂ¨Â®n para registrar el final del partido
+// Funci¨®n para registrar el final del partido
 function endMatch() {
     const endTime = new Date().toISOString();
     fetch("http://localhost:3000/register-end-match", {
@@ -237,7 +275,7 @@ room.onGameStop = function () {
 var playerPositions = []; // Almacena posiciones temporalmente.
 var sendInterval = 60; // Cantidad de ticks por segundo (1 segundo = 60 ticks)
 var lastSendTick = 0;
-const tickInterval = 60; // EnvÂ¨Âªa datos cada 60 ticks
+const tickInterval = 60; // Env¨ªa datos cada 60 ticks
 let tickCounter = 0; // Contador de ticks
 let lastTouchPlayer = null;
 
@@ -257,106 +295,107 @@ room.onGameTick = function () {
         console.warn("No hay un match_id activo. Ignorando datos.");
         return;
     }
-    
-    //Para saber si el partido esta activo
-    //console.log(`Pelota en juego: ${isBallBeingPlayed}`);
 
     const players = room.getPlayerList();
     const ball = room.getBallPosition();
     const scores = room.getScores();
     const currentTime = scores ? scores.time : 0;
-    const prev_time = -1;
-    
-    if(ball.x === 0 && ball.y === 0){
-				afterGoal = false;
-		}
-		
-		if(afterGoal){
-		    if(!isBallBeingPlayed){
-				    return;
-		    }
-    }
-    
-    if(ball.x === 0 && ball.y === 0 && !isBallBeingPlayed){
-		    return;
+
+    if (ball.x === 0 && ball.y === 0) {
+        afterGoal = false;
     }
 
-		
-		isBallBeingPlayed = true;
-		
+    if (afterGoal) {
+        if (!isBallBeingPlayed) {
+            return;
+        }
+    }
+
+    if (ball.x === 0 && ball.y === 0 && !isBallBeingPlayed) {
+        return;
+    }
+
+    isBallBeingPlayed = true;
+
     if (!players || !ball) {
-        console.error("No se pudieron obtener jugadores o posiciÂ¨Â®n de la pelota.");
+        console.error("No se pudieron obtener jugadores o posicion de la pelota.");
         return;
     }
 
     tickCounter++;
 
+    // Calculo de velocidades en cada tick
+    const validPlayers = players.filter(p => p.position).map(player => {
+        const currentPos = { x: player.position.x, y: player.position.y, time: currentTime };
+        const prev = previousPositions[player.id] || currentPos;
+        const deltaTime = prev.time !== undefined ? currentTime - prev.time : 1;
+
+        const velocity = calculateVelocity(currentPos, prev, deltaTime);
+        previousPositions[player.id] = currentPos;  // Guardamos la posicion actual para el proximo tick
+
+        return {
+            player_id: player.id,
+            player_name: player.name,
+            x: currentPos.x,
+            y: currentPos.y,
+            velocity_x: velocity.velocity_x,
+            velocity_y: velocity.velocity_y,
+            team: player.team
+        };
+    });
+
+    const ballData = (() => {
+        const currentBall = { x: ball.x, y: ball.y, time: currentTime };
+        const prevBall = previousPositions[0] || currentBall;
+        const deltaTime = prevBall.time !== undefined ? currentTime - prevBall.time : 1;
+
+        const velocity = calculateVelocity(currentBall, prevBall, deltaTime);
+        previousPositions[0] = currentBall;  // Guardamos la posicion de la pelota
+
+        return {
+            player_id: 0,
+            player_name: "Ball",
+            x: currentBall.x,
+            y: currentBall.y,
+            velocity_x: velocity.velocity_x,
+            velocity_y: velocity.velocity_y
+        };
+    })();
+
+    const filteredPlayers = validPlayers.filter(player => {
+        if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
+            console.error(`Error: La posicion del jugador ${player.player_id} es nula.`);
+            return false;
+        }
+        return true;
+    });
+
+    if (!ballData || ballData.x == null || ballData.y == null || ballData.velocity_x == null || ballData.velocity_y == null) {
+        console.error('Error: La posicion de la pelota o velocidades son nulas.');
+        return;
+    }
+
+    const data = {
+        time: currentTime,
+        players: filteredPlayers,
+        ball: ballData
+    };
+
+    playerPositions.push(data);
+
+    // Solo se envian los datos si se supera el intervalo
     if (tickCounter >= tickInterval) {
         tickCounter = 0;
 
-        const validPlayers = players.filter(p => p.position).map(player => {
-            const currentPos = { x: player.position.x, y: player.position.y, time: currentTime };
-            const prev = previousPositions[player.id] || currentPos;
-            const deltaTime = prev.time !== undefined ? currentTime - prev.time : 1;
 
-            const velocity = calculateVelocity(currentPos, prev, deltaTime);
-            previousPositions[player.id] = currentPos;
-
-            return {
-                player_id: player.id,
-                player_name: player.name,
-                x: currentPos.x,
-                y: currentPos.y,
-                velocity_x: velocity.velocity_x,
-                velocity_y: velocity.velocity_y,
-                team: player.team
-            };
-        }).filter(player => {
-            if (player.x == null || player.y == null || player.velocity_x == null || player.velocity_y == null) {
-                console.error(`Error: La posiciÂ¨Â®n del jugador ${player.player_id} es nula.`);
-                return false;
-            }
-            return true;
-        });
-
-        const ballData = (() => {
-            const currentBall = { x: ball.x, y: ball.y, time: currentTime };
-            const prevBall = previousPositions[0] || currentBall;
-            const deltaTime = prevBall.time !== undefined ? currentTime - prevBall.time : 1;
-
-            const velocity = calculateVelocity(currentBall, prevBall, deltaTime);
-            previousPositions[0] = currentBall;
-
-            if (currentBall.x == null || currentBall.y == null || velocity.velocity_x == null || velocity.velocity_y == null) {
-                console.error('Error: La posiciÂ¨Â®n de la pelota o velocidades son nulas.');
-                return null;
-            }
-
-            return {
-                player_id: 0,
-                player_name: "Ball",
-                x: currentBall.x,
-                y: currentBall.y,
-                velocity_x: velocity.velocity_x,
-                velocity_y: velocity.velocity_y
-            };
-        })();
-
-        if (!ballData) {
-            return;
-        }
-
-        const data = {
-            time: currentTime,
-            players: validPlayers,
-            ball: ballData
-        };
-
-        playerPositions.push(data);
         sendDataToBackend(playerPositions);
-        playerPositions = [];
     }
 
+    playerPositions = [];
+
+    
+
+    // Detectar jugador mas cercano a la pelota
     let closestPlayer = null;
     let closestDistance = Infinity;
 
@@ -380,21 +419,21 @@ room.onGameTick = function () {
 };
 
 
-// FunciÂ¨Â®n para enviar datos al servidor backend.
+// Funci¨®n para enviar datos al servidor backend.
 function sendDataToBackend(data) {
     if (!matchId) {
-        console.error("No se puede enviar datos porque el match_id no estÂ¨Â¢ definido.");
+        console.error("No se puede enviar datos porque el match_id no est¨¢ definido.");
         return;
     }
 
     fetch("http://localhost:3000/save-positions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match_id: matchId, positions: data }),
+        body: JSON.stringify({ match_id: matchId, positions: data , hora: new Date().toISOString()}),
     }).catch(err => console.error("Error enviando posiciones al backend:", err));
 }
 
-// Captura Â¨Â²ltimo jugador en tocar la pelota
+// Captura ¨²ltimo jugador en tocar la pelota
 room.onPlayerBallTouch = function (player) {
     lastTouchPlayer = player;
 };
@@ -406,6 +445,7 @@ room.onTeamGoal = function (team) {
     afterGoal = true;
     const scores = room.getScores();
     const goalTick = scores ? scores.time : 0;  // Obtener el tick del gol
+	const hora_gol = new Date().toISOString();
 
     if (lastTouchPlayer) {
         console.log(`GOOOOL de ${lastTouchPlayer.name}, equipo ${scoringTeam} en el tick ${goalTick}`);
@@ -417,7 +457,8 @@ room.onTeamGoal = function (team) {
                 player_id: lastTouchPlayer.id,
                 player_name: lastTouchPlayer.name,
                 equipo: scoringTeam,
-                tick: goalTick  // Enviar el tick del gol
+                tick: goalTick,  // Enviar el tick del gol
+				hora: hora_gol
             }),
         }).catch(err => console.error("Error enviando gol:", err));
     }
@@ -427,7 +468,7 @@ room.onTeamGoal = function (team) {
 room.onTeamVictory = function (scores) {
     isBallBeingPlayed = false;
     setTimeout(() => {
-        // No cambiar automÂ¨Â¢ticamente a true
+        // No cambiar autom¨¢ticamente a true
     }, 5000); // Mantener isBallBeingPlayed en falso durante 5 segundos
 
     console.log(`Victoria del equipo: ${scores.red > scores.blue ? 'Red' : 'Blue'}`);
