@@ -97,7 +97,7 @@ function checkAndReplacePlayer(teamIdLeft) {
         
         // Mover al equipo
         room.setPlayerTeam(substitute.id, teamIdLeft);
-        room.sendAnnouncement(`🔄 CAMBIO: ${substitute.name} entra a jugar. ¡Muévete o serás kickeado!`, null, 0x00FF00, "bold", 2);
+        room.sendAnnouncement(`🔄 ${substitute.name} entra a jugar. Movete o te kickeamos`, substitute.id, 0x00FF00, "bold", 2);
 
         // Configurar AFK Estricto para el nuevo
         if (afkTracker[substitute.id]) {
